@@ -4,12 +4,27 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Brain, User, Bot, Send } from "lucide-react"
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import { ChatSidebar, type ChatSession } from "@/components/chat-sidebar"
 
 interface Message {
   id: string
   content: string
   role: "user" | "assistant"
   timestamp: Date
+}
+
+interface ChatData {
+  id: string
+  messages: Message[]
+  title: string
+  lastMessage: string
+  timestamp: Date
+  messageCount: number
 }
 
 const quickQuestions = [
@@ -23,6 +38,8 @@ export default function VidyosChatbot() {
   const [messages, setMessages] = useState<Message[]>([])
   const [currentInput, setCurrentInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
+  const [chatData, setChatData] = useState<Record<string, ChatData>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -34,8 +51,99 @@ export default function VidyosChatbot() {
     scrollToBottom()
   }, [messages, isTyping])
 
+  // Load chat data from localStorage on component mount
+  useEffect(() => {
+    const savedChatData = localStorage.getItem('vidyos-chat-data')
+    if (savedChatData) {
+      const parsedData = JSON.parse(savedChatData)
+      // Convert timestamp strings back to Date objects
+      Object.keys(parsedData).forEach(chatId => {
+        parsedData[chatId].timestamp = new Date(parsedData[chatId].timestamp)
+        parsedData[chatId].messages.forEach((msg: any) => {
+          msg.timestamp = new Date(msg.timestamp)
+        })
+      })
+      setChatData(parsedData)
+    }
+  }, [])
+
+  // Save chat data to localStorage whenever chatData changes
+  useEffect(() => {
+    localStorage.setItem('vidyos-chat-data', JSON.stringify(chatData))
+  }, [chatData])
+
+  const generateChatTitle = (firstMessage: string): string => {
+    const title = firstMessage.substring(0, 40)
+    return title.length < firstMessage.length ? title + '...' : title
+  }
+
+  const createNewChat = () => {
+    const newChatId = Date.now().toString()
+    setCurrentChatId(newChatId)
+    setMessages([])
+    
+    const newChatData: ChatData = {
+      id: newChatId,
+      messages: [],
+      title: "New Chat",
+      lastMessage: "",
+      timestamp: new Date(),
+      messageCount: 0
+    }
+    
+    setChatData(prev => ({
+      ...prev,
+      [newChatId]: newChatData
+    }))
+  }
+
+  const loadChat = (chatId: string) => {
+    const chat = chatData[chatId]
+    if (chat) {
+      setCurrentChatId(chatId)
+      setMessages(chat.messages)
+    }
+  }
+
+  const deleteChat = (chatId: string) => {
+    setChatData(prev => {
+      const newData = { ...prev }
+      delete newData[chatId]
+      return newData
+    })
+    
+    // If the deleted chat was the current one, create a new chat
+    if (currentChatId === chatId) {
+      createNewChat()
+    }
+  }
+
+  const updateCurrentChat = (newMessages: Message[]) => {
+    if (!currentChatId) return
+    
+    const lastMessage = newMessages[newMessages.length - 1]
+    const title = newMessages.length === 1 ? generateChatTitle(newMessages[0].content) : chatData[currentChatId]?.title || "New Chat"
+    
+    setChatData(prev => ({
+      ...prev,
+      [currentChatId]: {
+        id: currentChatId,
+        messages: newMessages,
+        title,
+        lastMessage: lastMessage?.content || "",
+        timestamp: new Date(),
+        messageCount: newMessages.length
+      }
+    }))
+  }
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return
+
+    // Create new chat if none exists
+    if (!currentChatId) {
+      createNewChat()
+    }
 
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -44,9 +152,13 @@ export default function VidyosChatbot() {
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, newMessage])
+    const updatedMessages = [...messages, newMessage]
+    setMessages(updatedMessages)
     setCurrentInput("")
     setIsTyping(true)
+
+    // Update the current chat with the new message
+    updateCurrentChat(updatedMessages)
 
     // Simulate AI response
     setTimeout(() => {
@@ -70,10 +182,21 @@ export default function VidyosChatbot() {
         timestamp: new Date(),
       }
 
-      setMessages((prev) => [...prev, aiResponse])
+      const finalMessages = [...updatedMessages, aiResponse]
+      setMessages(finalMessages)
       setIsTyping(false)
+      
+      // Update the chat with the AI response
+      updateCurrentChat(finalMessages)
     }, 2000)
   }
+
+  // Initialize with a new chat if no chat exists
+  useEffect(() => {
+    if (Object.keys(chatData).length === 0) {
+      createNewChat()
+    }
+  }, [])
 
   const handleQuickQuestion = (question: string) => {
     handleSendMessage(question)
@@ -85,22 +208,35 @@ export default function VidyosChatbot() {
   }
 
   return (
-    <div className="min-h-screen py-8 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Header Section */}
-        <header className="text-center mb-8">
-          <div className="inline-block bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-600 p-6 mb-4 rounded-lg shadow-lg">
-            <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
-              <Brain className="w-7 h-7 text-purple-600" />
-              <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Vidyos
-              </span>
-            </h1>
-          </div>
-          <p className="text-gray-700 max-w-2xl mx-auto text-lg">
-            Your AI learning companion that explains complex topics in simple, understandable ways. Perfect for curious minds of all ages! 🧠✨
-          </p>
-        </header>
+    <SidebarProvider defaultOpen={true}>
+      <ChatSidebar
+        onNewChat={createNewChat}
+        onLoadChat={loadChat}
+        currentChatId={currentChatId || undefined}
+        onDeleteChat={deleteChat}
+      />
+      <SidebarInset>
+        <div className="min-h-screen py-8 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+          <div className="max-w-3xl mx-auto px-4">
+            {/* Header Section */}
+            <header className="text-center mb-8">
+              <div className="flex items-center gap-4 mb-4">
+                <SidebarTrigger className="md:hidden" />
+                <div className="flex-1">
+                  <div className="inline-block bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-600 p-6 rounded-lg shadow-lg">
+                    <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
+                      <Brain className="w-7 h-7 text-purple-600" />
+                      <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        Vidyos
+                      </span>
+                    </h1>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-700 max-w-2xl mx-auto text-lg">
+                Your AI learning companion that explains complex topics in simple, understandable ways. Perfect for curious minds of all ages! 🧠✨
+              </p>
+            </header>
 
         {/* Quick Questions Section */}
         <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -279,7 +415,9 @@ export default function VidyosChatbot() {
             </p>
           </div>
         </footer>
-      </div>
-    </div>
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
