@@ -193,10 +193,10 @@ export default function VidyosChatbot() {
 
   // Initialize with a new chat if no chat exists
   useEffect(() => {
-    if (Object.keys(chatData).length === 0) {
+    if (Object.keys(chatData).length === 0 && !currentChatId) {
       createNewChat()
     }
-  }, [])
+  }, [chatData])
 
   const handleQuickQuestion = (question: string) => {
     handleSendMessage(question)
@@ -207,6 +207,15 @@ export default function VidyosChatbot() {
     handleSendMessage(currentInput)
   }
 
+  // Convert chatData to ChatSession array for the sidebar
+  const chatSessions = Object.values(chatData).map(chat => ({
+    id: chat.id,
+    title: chat.title,
+    lastMessage: chat.lastMessage,
+    timestamp: chat.timestamp,
+    messageCount: chat.messageCount
+  })).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+
   return (
     <SidebarProvider defaultOpen={true}>
       <ChatSidebar
@@ -214,6 +223,7 @@ export default function VidyosChatbot() {
         onLoadChat={loadChat}
         currentChatId={currentChatId || undefined}
         onDeleteChat={deleteChat}
+        chatSessions={chatSessions}
       />
       <SidebarInset>
         <div className="min-h-screen py-8 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
@@ -221,7 +231,7 @@ export default function VidyosChatbot() {
             {/* Header Section */}
             <header className="text-center mb-8">
               <div className="flex items-center gap-4 mb-4">
-                <SidebarTrigger className="md:hidden" />
+                <SidebarTrigger className="bg-gradient-to-r from-purple-200 to-blue-200 hover:from-purple-300 hover:to-blue-300 border-2 border-gray-800" />
                 <div className="flex-1">
                   <div className="inline-block bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-600 p-6 rounded-lg shadow-lg">
                     <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
