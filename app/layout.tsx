@@ -3,8 +3,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Arete AI Assistant - Bharath's Knowledge Base",
-  description: "Ask me about Bharath's projects, skills, research, or experience.",
+  title: "Vidyos - AI Learning Companion",
+  description: "An AI chatbot that explains complex topics in simple, understandable ways - perfect for curious minds of all ages.",
     generator: 'v0.dev'
 }
 
