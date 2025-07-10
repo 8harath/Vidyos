@@ -22,13 +22,6 @@ interface ChatData {
   messageCount: number
 }
 
-interface DifyConfig {
-  apiKey: string
-  baseUrl: string
-  user: string
-  conversationId?: string
-}
-
 const quickQuestions = [
   "How do satellites stay in space?",
   "What is quantum entanglement in simple terms?",
@@ -42,9 +35,10 @@ export default function VidyosChatbot() {
   const [isTyping, setIsTyping] = useState(false)
   const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const [chatData, setChatData] = useState<Record<string, ChatData>>({})
-  const [difyConfig, setDifyConfig] = useState<DifyConfig | null>(null)
-  const [showConfig, setShowConfig] = useState(false)
-  const [isConfigured, setIsConfigured] = useState(false)
+  const [isApiAvailable, setIsApiAvailable] = useState(false)
+  const [isCheckingApi, setIsCheckingApi] = useState(true)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -71,18 +65,28 @@ export default function VidyosChatbot() {
       setChatData(parsedData)
     }
 
-    // Load Dify configuration
-    const savedDifyConfig = localStorage.getItem('vidyos-dify-config')
-    if (savedDifyConfig) {
-      try {
-        const config = JSON.parse(savedDifyConfig)
-        setDifyConfig(config)
-        setIsConfigured(true)
-      } catch (error) {
-        console.error('Failed to parse Dify config:', error)
-      }
-    }
+    // Check if server-side API is available
+    checkApiAvailability()
   }, [])
+
+  const checkApiAvailability = async () => {
+    try {
+      const response = await fetch('/api/dify/config')
+      if (response.ok) {
+        setIsApiAvailable(true)
+        setApiError(null)
+      } else {
+        const errorData = await response.json()
+        setIsApiAvailable(false)
+        setApiError(errorData.error || 'API configuration error')
+      }
+    } catch (error) {
+      setIsApiAvailable(false)
+      setApiError('Unable to connect to server')
+    } finally {
+      setIsCheckingApi(false)
+    }
+  }
 
   // Save chat data to localStorage whenever chatData changes
   useEffect(() => {
@@ -157,9 +161,9 @@ export default function VidyosChatbot() {
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return
 
-    // Check if Dify is configured
-    if (!isConfigured || !difyConfig) {
-      setShowConfig(true)
+    // Check if API is available
+    if (!isApiAvailable) {
+      setApiError('API is not available. Please check server configuration.')
       return
     }
 
@@ -184,33 +188,30 @@ export default function VidyosChatbot() {
     updateCurrentChat(updatedMessages)
 
     try {
-      // Call Dify API
-      const response = await fetch(`${difyConfig.baseUrl}/chat-messages`, {
+      // Call server-side API
+      const response = await fetch('/api/dify', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${difyConfig.apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inputs: {},
           query: content,
-          response_mode: 'blocking',
-          conversation_id: difyConfig.conversationId || '',
-          user: difyConfig.user
+          conversationId: conversationId || '',
+          responseMode: 'blocking',
+          user: `visitor-${Date.now()}`
         })
       })
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`)
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Server error: ${response.status}`)
       }
 
       const data = await response.json()
       
       // Update conversation ID if it's a new conversation
-      if (data.conversation_id && !difyConfig.conversationId) {
-        const updatedConfig = { ...difyConfig, conversationId: data.conversation_id }
-        setDifyConfig(updatedConfig)
-        localStorage.setItem('vidyos-dify-config', JSON.stringify(updatedConfig))
+      if (data.conversation_id && !conversationId) {
+        setConversationId(data.conversation_id)
       }
 
       const aiResponse: Message = {
@@ -228,9 +229,9 @@ export default function VidyosChatbot() {
       updateCurrentChat(finalMessages)
 
     } catch (error) {
-      console.error('Error calling Dify API:', error)
+      console.error('Error calling API:', error)
       
-      // Fallback to friendly error message
+      // Show user-friendly error message
       const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
         content: `I'm having trouble connecting to my AI brain right now. ${error instanceof Error ? error.message : 'Please try again later.'} 🤔`,
@@ -263,142 +264,6 @@ export default function VidyosChatbot() {
     handleSendMessage(currentInput)
   }
 
-  const handleConfigSave = (config: DifyConfig) => {
-    setDifyConfig(config)
-    setIsConfigured(true)
-    setShowConfig(false)
-    localStorage.setItem('vidyos-dify-config', JSON.stringify(config))
-  }
-
-  const resetConfig = () => {
-    setDifyConfig(null)
-    setIsConfigured(false)
-    setShowConfig(true)
-    localStorage.removeItem('vidyos-dify-config')
-  }
-
-  // Configuration Modal Component
-  const ConfigModal = () => {
-    const [tempConfig, setTempConfig] = useState<DifyConfig>(
-      difyConfig || {
-        apiKey: '',
-        baseUrl: 'https://api.dify.ai/v1',
-        user: 'user-' + Math.random().toString(36).substr(2, 9)
-      }
-    )
-    const [isTestingConnection, setIsTestingConnection] = useState(false)
-
-    const testConnection = async () => {
-      if (!tempConfig.apiKey.trim()) {
-        alert('Please enter an API key first')
-        return
-      }
-
-      setIsTestingConnection(true)
-      try {
-        const response = await fetch(`${tempConfig.baseUrl}/chat-messages`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${tempConfig.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            inputs: {},
-            query: 'Hello, this is a test message.',
-            response_mode: 'blocking',
-            conversation_id: '',
-            user: tempConfig.user
-          })
-        })
-
-        if (response.ok) {
-          alert('Connection successful! 🎉')
-        } else {
-          const errorText = await response.text()
-          alert(`Connection failed: ${response.status} - ${errorText}`)
-        }
-      } catch (error) {
-        alert(`Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-      } finally {
-        setIsTestingConnection(false)
-      }
-    }
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white border-2 border-gray-800 p-6 max-w-md w-full shadow-lg">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Configure Dify API
-          </h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">API Key</label>
-              <input
-                type="password"
-                value={tempConfig.apiKey}
-                onChange={(e) => setTempConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                placeholder="Enter your Dify API key"
-                className="w-full px-3 py-2 border-2 border-gray-300 focus:border-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Base URL</label>
-              <input
-                type="url"
-                value={tempConfig.baseUrl}
-                onChange={(e) => setTempConfig(prev => ({ ...prev, baseUrl: e.target.value }))}
-                placeholder="https://api.dify.ai/v1"
-                className="w-full px-3 py-2 border-2 border-gray-300 focus:border-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">User ID</label>
-              <input
-                type="text"
-                value={tempConfig.user}
-                onChange={(e) => setTempConfig(prev => ({ ...prev, user: e.target.value }))}
-                placeholder="Unique user identifier"
-                className="w-full px-3 py-2 border-2 border-gray-300 focus:border-blue-500 outline-none"
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleConfigSave(tempConfig)}
-                disabled={!tempConfig.apiKey.trim()}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 border-2 border-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Save Configuration
-              </button>
-              <button
-                onClick={testConnection}
-                disabled={isTestingConnection || !tempConfig.apiKey.trim()}
-                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white border-2 border-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isTestingConnection ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  'Test'
-                )}
-              </button>
-            </div>
-
-            <button
-              onClick={() => setShowConfig(false)}
-              className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 border-2 border-gray-800 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen py-8 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       <div className="max-w-3xl mx-auto px-4">
@@ -417,24 +282,34 @@ export default function VidyosChatbot() {
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <button
-                    onClick={() => setShowConfig(true)}
+                    onClick={() => checkApiAvailability()}
                     className="p-2 bg-gray-200 hover:bg-gray-300 border-2 border-gray-800 transition-colors"
-                    title="Configure Dify API"
+                    title="Check API Status"
+                    disabled={isCheckingApi}
                   >
-                    <Settings className="w-5 h-5" />
+                    {isCheckingApi ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Settings className="w-5 h-5" />
+                    )}
                   </button>
                   <div className={`text-xs px-2 py-1 rounded border ${
-                    isConfigured 
+                    isApiAvailable 
                       ? 'bg-green-100 border-green-300 text-green-800' 
                       : 'bg-red-100 border-red-300 text-red-800'
                   }`}>
-                    {isConfigured ? 'API Connected' : 'API Not Set'}
+                    {isApiAvailable ? 'API Ready' : 'API Not Ready'}
                   </div>
                 </div>
               </div>
               <p className="text-gray-700 max-w-2xl mx-auto text-lg">
                 Your AI learning companion powered by Dify API that explains complex topics in simple, understandable ways. Perfect for curious minds of all ages! 🧠✨
               </p>
+              {apiError && (
+                <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
+                  {apiError}
+                </div>
+              )}
             </header>
 
             {/* Navigation */}
@@ -462,20 +337,20 @@ export default function VidyosChatbot() {
               key={index}
               onClick={() => handleQuickQuestion(question)}
               className={`retro-button text-left p-3 text-sm bg-gradient-to-r from-blue-100 to-purple-100 hover:from-blue-200 hover:to-purple-200 border-2 border-gray-800 transition-all duration-300 ${
-                !isConfigured || isTyping ? 'opacity-50 cursor-not-allowed' : ''
+                !isApiAvailable || isTyping ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               style={{ boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.3)" }}
-              whileHover={isConfigured && !isTyping ? {
+              whileHover={isApiAvailable && !isTyping ? {
                 scale: 1.05,
                 y: -2,
                 x: -2,
               } : {}}
-              whileTap={isConfigured && !isTyping ? {
+              whileTap={isApiAvailable && !isTyping ? {
                 scale: 0.98,
                 y: 1,
                 x: 1,
               } : {}}
-              disabled={!isConfigured || isTyping}
+              disabled={!isApiAvailable || isTyping}
             >
               {question}
             </motion.button>
@@ -507,10 +382,10 @@ export default function VidyosChatbot() {
                     <p className="text-sm font-mono">
                       Hi there, curious learner! 👋 I'm Vidyos, your friendly AI companion powered by Dify API who loves making complex topics simple and fun to understand. 
                       <br/><br/>
-                      {isConfigured ? (
+                      {isApiAvailable ? (
                         <>Think of me as your patient mentor who can explain anything - from how rockets work to why the ocean has waves - in ways that make perfect sense. Ready to explore something amazing together? 🚀</>
                       ) : (
-                        <>To get started, please click the <Settings className="w-4 h-4 inline mx-1" /> settings button in the header to configure your Dify API key. Once configured, I'll be ready to answer all your curious questions! 🔧</>
+                        <>The AI service is currently being configured. Please wait a moment or contact the administrator if this persists. 🔧</>
                       )}
                     </p>
                   </motion.div>
@@ -603,18 +478,18 @@ export default function VidyosChatbot() {
                 type="text"
                 value={currentInput}
                 onChange={(e) => setCurrentInput(e.target.value)}
-                placeholder={isConfigured ? "Ask me anything! I'll explain it simply..." : "Configure API first..."}
-                disabled={!isConfigured || isTyping}
+                placeholder={isApiAvailable ? "Ask me anything! I'll explain it simply..." : "API not ready..."}
+                disabled={!isApiAvailable || isTyping}
                 className="flex-1 px-3 py-2 border-2 border-gray-800 bg-gradient-to-r from-amber-50 to-orange-50 font-mono text-sm text-gray-900 placeholder-gray-600 transition-all duration-300 focus:from-white focus:to-white focus:border-purple-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ boxShadow: "inset 2px 2px 4px rgba(0, 0, 0, 0.1)" }}
               />
 
               <motion.button
                 type="submit"
-                disabled={!isConfigured || !currentInput.trim() || isTyping}
+                disabled={!isApiAvailable || !currentInput.trim() || isTyping}
                 className="retro-button px-4 py-2 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-200 to-blue-200 hover:from-purple-300 hover:to-blue-300 border-2 border-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.3)" }}
-                whileHover={isConfigured && !isTyping && currentInput.trim() ? {
+                whileHover={isApiAvailable && !isTyping && currentInput.trim() ? {
                   y: -2,
                   x: -2,
                 } : {}}
@@ -639,9 +514,6 @@ export default function VidyosChatbot() {
           </div>
         </footer>
       </div>
-      
-      {/* Configuration Modal */}
-      {showConfig && <ConfigModal />}
     </div>
   )
 }
