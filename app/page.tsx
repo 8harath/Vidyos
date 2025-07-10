@@ -4,12 +4,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Brain, User, Bot, Send } from "lucide-react"
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { ChatSidebar, type ChatSession } from "@/components/chat-sidebar"
+import Link from "next/link"
 
 interface Message {
   id: string
@@ -208,20 +203,11 @@ export default function VidyosChatbot() {
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <ChatSidebar
-        onNewChat={createNewChat}
-        onLoadChat={loadChat}
-        currentChatId={currentChatId || undefined}
-        onDeleteChat={deleteChat}
-      />
-      <SidebarInset>
-        <div className="min-h-screen py-8 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-          <div className="max-w-3xl mx-auto px-4">
+    <div className="min-h-screen py-8 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+      <div className="max-w-3xl mx-auto px-4">
             {/* Header Section */}
             <header className="text-center mb-8">
               <div className="flex items-center gap-4 mb-4">
-                <SidebarTrigger className="md:hidden" />
                 <div className="flex-1">
                   <div className="inline-block bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-600 p-6 rounded-lg shadow-lg">
                     <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
@@ -237,6 +223,24 @@ export default function VidyosChatbot() {
                 Your AI learning companion that explains complex topics in simple, understandable ways. Perfect for curious minds of all ages! 🧠✨
               </p>
             </header>
+
+            {/* Navigation */}
+            <div className="text-center mb-6">
+              <Link href="/chatbots">
+                <motion.button
+                  className="retro-button inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 hover:from-green-200 hover:to-blue-200 border-2 border-gray-800 transition-all duration-300"
+                  style={{ boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.3)" }}
+                  whileHover={{
+                    boxShadow: "6px 6px 0px rgba(0, 0, 0, 0.3)",
+                    transform: "translate(-2px, -2px)"
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Bot className="w-4 h-4" />
+                  Dify AI Chatbots
+                </motion.button>
+              </Link>
+            </div>
 
         {/* Quick Questions Section */}
         <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -415,9 +419,7 @@ export default function VidyosChatbot() {
             </p>
           </div>
         </footer>
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </div>
   )
 }
