@@ -11,7 +11,7 @@ export default function ChatbotIndex() {
     <div className="container mx-auto p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Dify AI Chatbot Options</h1>
+          <h1 className="text-3xl font-bold mb-2">Gemini AI Chatbot Options</h1>
           <p className="text-muted-foreground">
             Choose the chatbot implementation that best fits your needs
           </p>

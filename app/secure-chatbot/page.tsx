@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { StreamingChatBot } from '@/components/streaming-chat-bot'
+import { GeminiChatBot } from '@/components/gemini-chat-bot'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Shield, Lock } from 'lucide-react'
@@ -18,7 +18,7 @@ export default function SecureChatBot() {
 
   const checkServerConfig = async () => {
     try {
-      const response = await fetch('/api/dify/config')
+      const response = await fetch('/api/gemini/config')
       if (response.ok) {
         setIsConfigured(true)
       } else {
@@ -86,11 +86,8 @@ export default function SecureChatBot() {
           </p>
         </div>
         
-        <StreamingChatBot
-          apiKey="" // Not needed for server-side calls
-          baseUrl="/api/dify" // Use our secure API route
-          user="secure-user"
-          title="Secure AI Assistant"
+        <GeminiChatBot
+          title="Secure Gemini AI Assistant"
           placeholder="Your message is secure..."
         />
       </div>
