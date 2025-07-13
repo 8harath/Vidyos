@@ -2,9 +2,7 @@
 
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Brain, User, Bot, Send, Settings, Loader2 } from "lucide-react"
-import Link from "next/link"
+import { Brain, User, Bot, Send, Loader2 } from "lucide-react"
 
 interface Message {
   id: string
@@ -23,10 +21,8 @@ interface ChatData {
 }
 
 const quickQuestions = [
-  "How do satellites stay in space?",
-  "What is quantum entanglement in simple terms?",
-  "How does the internet work?",
-  "Why is the sky blue?",
+  "How does artificial intelligence work?",
+  "What is machine learning?",
 ]
 
 export default function VidyosChatbot() {
@@ -265,253 +261,201 @@ export default function VidyosChatbot() {
   }
 
   return (
-    <div className="min-h-screen py-8 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-      <div className="max-w-3xl mx-auto px-4">
-            {/* Header Section */}
-            <header className="text-center mb-8">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex-1">
-                  <div className="inline-block bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-600 p-6 rounded-lg shadow-lg">
-                    <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
-                      <Brain className="w-7 h-7 text-purple-600" />
-                      <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                        Vidyos
-                      </span>
-                    </h1>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Header Section */}
+        <header className="text-center mb-8">
+          <div className="mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4 flex items-center justify-center gap-4">
+              <Brain className="w-10 h-10 md:w-12 md:h-12 text-gray-900" />
+              Vidyos
+              <div className={`ml-4 px-3 py-1 rounded-full text-xs font-medium border ${
+                isApiAvailable 
+                  ? 'bg-gray-100 text-gray-800 border-gray-300' 
+                  : 'bg-gray-50 text-gray-600 border-gray-200'
+              }`}>
+                {isCheckingApi ? (
+                  <div className="flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Connecting...</span>
                   </div>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                  <button
-                    onClick={() => checkApiAvailability()}
-                    className="p-2 bg-gray-200 hover:bg-gray-300 border-2 border-gray-800 transition-colors"
-                    title="Check API Status"
-                    disabled={isCheckingApi}
-                  >
-                    {isCheckingApi ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Settings className="w-5 h-5" />
-                    )}
-                  </button>
-                  <div className={`text-xs px-2 py-1 rounded border ${
-                    isApiAvailable 
-                      ? 'bg-green-100 border-green-300 text-green-800' 
-                      : 'bg-red-100 border-red-300 text-red-800'
-                  }`}>
-                    {isApiAvailable ? 'API Ready' : 'API Not Ready'}
+                ) : isApiAvailable ? (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
+                    <span>Ready</span>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                    <span>Connecting</span>
+                  </div>
+                )}
               </div>
-              <p className="text-gray-700 max-w-2xl mx-auto text-lg">
-                Your AI learning companion powered by Dify API that explains complex topics in simple, understandable ways. Perfect for curious minds of all ages! 🧠✨
-              </p>
-              {apiError && (
-                <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
-                  {apiError}
+            </h1>
+            
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
+              AI-powered assistant for intelligent conversations
+            </p>
+            
+            {apiError && (
+              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-gray-400 rounded-full"></div>
+                  <span className="font-medium">Connection Issue:</span>
                 </div>
-              )}
-            </header>
-
-            {/* Navigation */}
-            <div className="text-center mb-6">
-              <Link href="/chatbots">
-                <motion.button
-                  className="retro-button inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 hover:from-green-200 hover:to-blue-200 border-2 border-gray-800 transition-all duration-300"
-                  style={{ boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.3)" }}
-                  whileHover={{
-                    boxShadow: "6px 6px 0px rgba(0, 0, 0, 0.3)",
-                    transform: "translate(-2px, -2px)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Bot className="w-4 h-4" />
-                  Dify AI Chatbots
-                </motion.button>
-              </Link>
-            </div>
+                <p className="mt-1">{apiError}</p>
+              </div>
+            )}
+          </div>
+        </header>
 
         {/* Quick Questions Section */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-          {quickQuestions.map((question, index) => (
-            <motion.button
-              key={index}
-              onClick={() => handleQuickQuestion(question)}
-              className={`retro-button text-left p-3 text-sm bg-gradient-to-r from-blue-100 to-purple-100 hover:from-blue-200 hover:to-purple-200 border-2 border-gray-800 transition-all duration-300 ${
-                !isApiAvailable || isTyping ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              style={{ boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.3)" }}
-              whileHover={isApiAvailable && !isTyping ? {
-                scale: 1.05,
-                y: -2,
-                x: -2,
-              } : {}}
-              whileTap={isApiAvailable && !isTyping ? {
-                scale: 0.98,
-                y: 1,
-                x: 1,
-              } : {}}
-              disabled={!isApiAvailable || isTyping}
-            >
-              {question}
-            </motion.button>
-          ))}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+            {quickQuestions.map((question, index) => (
+              <button
+                key={index}
+                onClick={() => handleQuickQuestion(question)}
+                className={`text-left p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors duration-200 ${
+                  !isApiAvailable || isTyping ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={!isApiAvailable || isTyping}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gray-900 text-white rounded-lg flex items-center justify-center">
+                    <span className="text-sm font-bold">{index + 1}</span>
+                  </div>
+                  <span className="text-gray-800 font-medium">{question}</span>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Chat Container */}
-        <div className="bg-gray-100 border-2 border-gray-800 p-4 shadow-lg">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+          {/* Chat Header */}
+          <div className="bg-gray-900 text-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Vidyos Assistant</h3>
+                <p className="text-gray-300 text-sm">AI-powered chat</p>
+              </div>
+            </div>
+          </div>
+
           {/* Messages Area */}
-          <div className="h-80 overflow-y-auto mb-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-gray-400 custom-scrollbar">
-            <div className="space-y-4">
+          <div className="h-96 overflow-y-auto p-6 bg-gray-50">
+            <div className="space-y-6">
               {messages.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex gap-3"
-                >
-                  <motion.div
-                    className="w-8 h-8 border-2 border-gray-800 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-r from-purple-200 to-blue-200 text-gray-800"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                  >
-                    <Bot className="w-4 h-4" />
-                  </motion.div>
-                  <motion.div
-                    className="max-w-72 lg:max-w-96 border-2 border-gray-800 px-3 py-2 bg-gradient-to-r from-purple-100 to-blue-100"
-                    style={{ boxShadow: "2px 2px 0px rgba(0, 0, 0, 0.3)" }}
-                  >
-                    <p className="text-sm font-mono">
-                      Hi there, curious learner! 👋 I'm Vidyos, your friendly AI companion powered by Dify API who loves making complex topics simple and fun to understand. 
-                      <br/><br/>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="max-w-sm bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                    <p className="text-gray-800 leading-relaxed">
                       {isApiAvailable ? (
-                        <>Think of me as your patient mentor who can explain anything - from how rockets work to why the ocean has waves - in ways that make perfect sense. Ready to explore something amazing together? 🚀</>
+                        <>Hello! I'm Vidyos, your AI assistant. How can I help you today?</>
                       ) : (
-                        <>The AI service is currently being configured. Please wait a moment or contact the administrator if this persists. 🔧</>
+                        <>Connecting to AI service...<//>
                       )}
                     </p>
-                  </motion.div>
-                </motion.div>
+                  </div>
+                </div>
               )}
-              <AnimatePresence>
-                {messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-                  >
-                    {/* Avatar */}
-                    <motion.div
-                      className={`w-8 h-8 border-2 border-gray-800 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-300 ${
-                        message.role === "user" ? "bg-gradient-to-r from-green-200 to-emerald-200 text-gray-800" : "bg-gradient-to-r from-purple-200 to-blue-200 text-gray-800"
-                      }`}
-                      whileHover={{ scale: 1.1 }}
-                    >
-                      {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                    </motion.div>
+              
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-4 ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+                >
+                  {/* Avatar */}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    message.role === "user" 
+                      ? "bg-gray-700" 
+                      : "bg-gray-900"
+                  }`}>
+                    {message.role === "user" ? 
+                      <User className="w-5 h-5 text-white" /> : 
+                      <Bot className="w-5 h-5 text-white" />
+                    }
+                  </div>
 
-                    {/* Message Bubble */}
-                    <motion.div
-                      className={`max-w-72 lg:max-w-96 border-2 border-gray-800 px-3 py-2 transition-all duration-300 ${
-                        message.role === "user" ? "bg-gradient-to-r from-green-100 to-emerald-100 text-gray-900" : "bg-gradient-to-r from-purple-100 to-blue-100 text-gray-900"
-                      }`}
-                      style={{ boxShadow: "2px 2px 0px rgba(0, 0, 0, 0.3)" }}
-                      whileHover={{
-                        boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.4)",
-                      }}
-                    >
-                      <p className="text-sm font-mono">{message.content}</p>
-                    </motion.div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  {/* Message Bubble */}
+                  <div className={`max-w-sm lg:max-w-md p-4 rounded-lg shadow-sm border ${
+                    message.role === "user" 
+                      ? "bg-gray-900 text-white border-gray-800" 
+                      : "bg-white text-gray-800 border-gray-200"
+                  }`}>
+                    <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    <div className={`text-xs mt-2 ${
+                      message.role === "user" ? "text-gray-300" : "text-gray-500"
+                    }`}>
+                      {message.timestamp.toLocaleTimeString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
 
               {/* Typing Indicator */}
-              <AnimatePresence>
-                {isTyping && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="flex gap-3"
-                  >
-                    <motion.div
-                      className="w-8 h-8 border-2 border-gray-800 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-r from-purple-200 to-blue-200 text-gray-800"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
-                    >
-                      <Bot className="w-4 h-4" />
-                    </motion.div>
-
-                    <div
-                      className="max-w-72 lg:max-w-96 border-2 border-gray-800 px-3 py-2 bg-gradient-to-r from-purple-100 to-blue-100"
-                      style={{ boxShadow: "2px 2px 0px rgba(0, 0, 0, 0.3)" }}
-                    >
-                      <div className="flex gap-1">
-                        {[0, 1, 2].map((i) => (
-                          <motion.div
-                            key={i}
-                            className="w-2 h-2 bg-amber-500 rounded-full"
-                            animate={{ y: [0, -8, 0] }}
-                            transition={{
-                              duration: 1,
-                              repeat: Number.POSITIVE_INFINITY,
-                              delay: i * 0.1,
-                            }}
-                          />
-                        ))}
-                      </div>
+              {isTyping && (
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                    <div className="flex gap-1">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                          style={{ animationDelay: `${i * 0.2}s` }}
+                        />
+                      ))}
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+                </div>
+              )}
 
               <div ref={messagesEndRef} />
             </div>
           </div>
 
           {/* Input Section */}
-          <form onSubmit={handleSubmit} className="border-t-2 border-gray-400 pt-4">
-            <div className="flex gap-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={currentInput}
-                onChange={(e) => setCurrentInput(e.target.value)}
-                placeholder={isApiAvailable ? "Ask me anything! I'll explain it simply..." : "API not ready..."}
-                disabled={!isApiAvailable || isTyping}
-                className="flex-1 px-3 py-2 border-2 border-gray-800 bg-gradient-to-r from-amber-50 to-orange-50 font-mono text-sm text-gray-900 placeholder-gray-600 transition-all duration-300 focus:from-white focus:to-white focus:border-purple-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ boxShadow: "inset 2px 2px 4px rgba(0, 0, 0, 0.1)" }}
-              />
+          <div className="p-6 bg-white border-t border-gray-200">
+            <form onSubmit={handleSubmit}>
+              <div className="flex gap-3">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={currentInput}
+                  onChange={(e) => setCurrentInput(e.target.value)}
+                  placeholder={isApiAvailable ? "Type your message..." : "Connecting..."}
+                  disabled={!isApiAvailable || isTyping}
+                  className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-500 focus:bg-white focus:border-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                />
 
-              <motion.button
-                type="submit"
-                disabled={!isApiAvailable || !currentInput.trim() || isTyping}
-                className="retro-button px-4 py-2 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-200 to-blue-200 hover:from-purple-300 hover:to-blue-300 border-2 border-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.3)" }}
-                whileHover={isApiAvailable && !isTyping && currentInput.trim() ? {
-                  y: -2,
-                  x: -2,
-                } : {}}
-                whileTap={{
-                  y: 1,
-                  x: 1,
-                }}
-              >
-                <Send className="w-4 h-4" />
-                Send
-              </motion.button>
-            </div>
-          </form>
+                <button
+                  type="submit"
+                  disabled={!isApiAvailable || !currentInput.trim() || isTyping}
+                  className="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  Send
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
-        {/* Footer Section */}
-        <footer className="mt-6 text-center">
-          <div className="inline-block bg-gradient-to-r from-amber-100 to-orange-100 border border-gray-400 px-3 py-1 rounded-lg">
-            <p className="text-xs text-gray-600 font-mono">
-              🤖 Vidyos • Making complex topics simple for curious minds
-            </p>
-          </div>
+        {/* Footer */}
+        <footer className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            Powered by Vidyos AI
+          </p>
         </footer>
       </div>
     </div>
