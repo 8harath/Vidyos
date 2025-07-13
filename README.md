@@ -1,20 +1,22 @@
-# Vidyos - AI Chatbot Application
+# Vidyos - Gemini AI Chatbot Application
 
-A modern, production-ready AI chatbot application built with Next.js and Dify API integration.
+A modern, production-ready AI chatbot application built with Next.js and Google Gemini AI integration.
 
 ![Vidyos Chatbot](https://img.shields.io/badge/Status-Production%20Ready-green)
 ![Next.js](https://img.shields.io/badge/Next.js-14.2.16-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
+![Gemini](https://img.shields.io/badge/Gemini-AI-blue)
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Conversations**: Integration with Dify API for intelligent responses
+- 🤖 **AI-Powered Conversations**: Integration with Google Gemini AI for intelligent responses
 - 💬 **Real-time Chat**: Instant messaging with typing indicators
 - 📱 **Responsive Design**: Works perfectly on desktop and mobile
 - 🔄 **Persistent Chat History**: Conversations saved in localStorage
 - 🛡️ **Production Ready**: Error handling, fallback responses, and health checks
 - 🎨 **Modern UI**: Clean, professional interface with Tailwind CSS
 - 🚀 **Demo Mode**: Test the application without API configuration
+- 🧠 **Multiple Models**: Support for Gemini 1.5 Flash, Pro, and other models
 
 ## 🚀 Quick Start
 
@@ -22,7 +24,7 @@ A modern, production-ready AI chatbot application built with Next.js and Dify AP
 
 - Node.js 18.x or higher
 - npm or pnpm package manager
-- Dify API key (get it from [dify.ai](https://dify.ai))
+- Google Gemini API key (get it from [Google AI Studio](https://makersuite.google.com/app/apikey))
 
 ### Installation
 
@@ -46,7 +48,8 @@ A modern, production-ready AI chatbot application built with Next.js and Dify AP
 
 4. **Configure your API key** in `.env.local`:
    ```env
-   DIFY_API_KEY=your_dify_api_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_MODEL=gemini-1.5-flash
    DEMO_MODE=false
    ENABLE_FALLBACK=true
    ```
@@ -78,18 +81,25 @@ For detailed deployment instructions, see [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRO
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DIFY_API_KEY` | Yes* | - | Your Dify API key |
-| `DIFY_BASE_URL` | No | `https://api.dify.ai/v1` | Dify API endpoint |
+| `GEMINI_API_KEY` | Yes* | - | Your Google Gemini API key |
+| `GEMINI_MODEL` | No | `gemini-1.5-flash` | Gemini model to use |
 | `DEMO_MODE` | No | `false` | Enable demo mode |
 | `ENABLE_FALLBACK` | No | `true` | Enable fallback responses |
+| `PUBLIC_ACCESS` | No | `true` | Allow public access |
 
 *Required for production. Demo mode works without it.
 
 ### Application Modes
 
-- **Production Mode**: Full AI functionality with Dify API
+- **Production Mode**: Full AI functionality with Gemini API
 - **Demo Mode**: Mock responses for testing and development
 - **Fallback Mode**: Graceful degradation when API is unavailable
+
+### Available Models
+
+- **gemini-1.5-flash**: Fast responses, ideal for most conversations
+- **gemini-1.5-pro**: Advanced model for complex tasks
+- **gemini-pro**: Standard model for general use
 
 ## 📁 Project Structure
 
@@ -97,7 +107,7 @@ For detailed deployment instructions, see [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRO
 vidyos/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes
-│   │   ├── dify/         # Dify API integration
+│   │   ├── gemini/       # Gemini AI integration
 │   │   └── health/       # Health check endpoint
 │   ├── globals.css       # Global styles
 │   ├── layout.tsx        # Root layout
@@ -119,13 +129,14 @@ npm run dev         # Start development server
 npm run build       # Build for production
 npm run start       # Start production server
 npm run lint        # Run ESLint
+npm run verify-env  # Verify environment configuration
 ```
 
 ### API Endpoints
 
 - `GET /api/health` - Health check and system status
-- `GET /api/dify/config` - API configuration status
-- `POST /api/dify` - Send chat messages to AI
+- `GET /api/gemini/config` - API configuration status
+- `POST /api/gemini` - Send chat messages to Gemini AI
 
 ### Adding New Features
 
@@ -138,19 +149,23 @@ npm run lint        # Run ESLint
 
 ### Common Issues
 
-1. **"DIFY_API_KEY environment variable is not set"**
+1. **"GEMINI_API_KEY environment variable is not set"**
    - Check your `.env.local` file
-   - Verify the API key is correct
+   - Verify the API key is correct from Google AI Studio
    - Ensure the file is in the project root
 
 2. **API Connection Issues**
    - Verify internet connection
-   - Check Dify service status
+   - Check Google AI Studio API status
    - Enable fallback mode
 
 3. **Demo Mode**
    - Set `DEMO_MODE=true` for testing
-   - Configure `DIFY_API_KEY` for production
+   - Configure `GEMINI_API_KEY` for production
+
+4. **Model Issues**
+   - Ensure the model name is correct (gemini-1.5-flash, gemini-1.5-pro, etc.)
+   - Check if the model is available in your region
 
 ### Health Check
 
@@ -200,7 +215,8 @@ This project is licensed under the MIT License.
 
 ## 🔗 Links
 
-- [Dify Documentation](https://docs.dify.ai/)
+- [Google AI Studio](https://makersuite.google.com/app/apikey) - Get your Gemini API key
+- [Gemini API Documentation](https://ai.google.dev/gemini-api/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS](https://tailwindcss.com/)
 
