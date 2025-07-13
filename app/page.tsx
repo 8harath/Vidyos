@@ -68,13 +68,13 @@ export default function VidyosChatbot() {
 
   const checkApiAvailability = async () => {
     try {
-      const response = await fetch('/api/dify/config')
+      const response = await fetch('/api/gemini/config')
       if (response.ok) {
         const data = await response.json()
         if (data.demoMode) {
           setApiStatus('demo')
           setIsApiAvailable(true)
-          setApiError('Running in demo mode - configure Dify API for full functionality')
+          setApiError('Running in demo mode - configure Gemini API for full functionality')
         } else {
           setApiStatus('configured')
           setIsApiAvailable(true)
@@ -196,7 +196,7 @@ export default function VidyosChatbot() {
 
     try {
       // Call server-side API
-      const response = await fetch('/api/dify', {
+      const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,8 +204,7 @@ export default function VidyosChatbot() {
         body: JSON.stringify({
           query: content,
           conversationId: conversationId || '',
-          responseMode: 'blocking',
-          user: `visitor-${Date.now()}`
+          responseMode: 'blocking'
         })
       })
 

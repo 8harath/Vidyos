@@ -23,15 +23,15 @@ require('dotenv').config({ path: envPath });
 // Check required environment variables
 const checks = [
   {
-    name: 'DIFY_API_KEY',
+    name: 'GEMINI_API_KEY',
     required: false, // Not required if demo mode is enabled
-    description: 'Your Dify API key from https://dify.ai'
+    description: 'Your Google Gemini API key from https://makersuite.google.com/app/apikey'
   },
   {
-    name: 'DIFY_BASE_URL',
+    name: 'GEMINI_MODEL',
     required: false,
-    description: 'Dify API base URL',
-    default: 'https://api.dify.ai/v1'
+    description: 'Gemini model to use',
+    default: 'gemini-1.5-flash'
   },
   {
     name: 'DEMO_MODE',
@@ -58,7 +58,7 @@ checks.forEach(check => {
     console.log(`   ${check.description}`);
     allPassed = false;
   } else if (hasValue) {
-    console.log(`✅ ${check.name}: ${value === process.env.DIFY_API_KEY ? '***' : value}`);
+    console.log(`✅ ${check.name}: ${value === process.env.GEMINI_API_KEY ? '***' : value}`);
   } else {
     console.log(`⚠️  ${check.name}: using default (${check.default || 'none'})`);
   }
@@ -66,16 +66,17 @@ checks.forEach(check => {
 
 // Check demo mode configuration
 const demoMode = process.env.DEMO_MODE === 'true';
-const hasApiKey = process.env.DIFY_API_KEY && process.env.DIFY_API_KEY.trim() !== '';
+const hasApiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '';
 
 console.log('\n📋 Configuration Summary:');
 console.log(`   Mode: ${demoMode ? 'Demo Mode' : 'Production Mode'}`);
 console.log(`   API Key: ${hasApiKey ? 'Configured' : 'Not configured'}`);
+console.log(`   Model: ${process.env.GEMINI_MODEL || 'gemini-1.5-flash'}`);
 console.log(`   Fallback: ${process.env.ENABLE_FALLBACK !== 'false' ? 'Enabled' : 'Disabled'}`);
 
 if (!hasApiKey && !demoMode) {
   console.log('\n⚠️  Warning: No API key configured and demo mode is disabled');
-  console.log('   Either set DIFY_API_KEY or enable DEMO_MODE=true');
+  console.log('   Either set GEMINI_API_KEY or enable DEMO_MODE=true');
   allPassed = false;
 }
 

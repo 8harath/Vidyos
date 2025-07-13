@@ -17,9 +17,8 @@ interface Message {
 }
 
 interface ChatBotProps {
-  apiKey: string
-  baseUrl?: string
-  user?: string
+  apiKey?: string
+  model?: string
   title?: string
   placeholder?: string
   className?: string
@@ -27,8 +26,7 @@ interface ChatBotProps {
 
 export function ChatBot({ 
   apiKey, 
-  baseUrl = 'https://api.dify.ai/v1', 
-  user = 'user-' + Math.random().toString(36).substr(2, 9),
+  model = 'gemini-1.5-flash',
   title = 'AI Assistant',
   placeholder = 'Type your message...',
   className = ''
@@ -66,18 +64,15 @@ export function ChatBot({
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${baseUrl}/chat-messages`, {
+      const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inputs: {},
           query: message,
-          response_mode: 'blocking', // Use blocking mode for simpler implementation
-          conversation_id: conversationId || '',
-          user: user
+          conversationId: conversationId || undefined,
+          responseMode: 'blocking'
         })
       })
 

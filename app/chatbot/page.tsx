@@ -1,21 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { StreamingChatBot } from '@/components/streaming-chat-bot'
+import { GeminiChatBot } from '@/components/gemini-chat-bot'
 import { ChatBot } from '@/components/chat-bot'
-import { DifyConfig, type DifyConfig as DifyConfigType } from '@/components/dify-config'
+import { GeminiConfig, type GeminiConfig as GeminiConfigType } from '@/components/gemini-config'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Zap, MessageSquare, Settings } from 'lucide-react'
 
 export default function ChatBotDemo() {
-  const [config, setConfig] = useState<DifyConfigType | null>(null)
+  const [config, setConfig] = useState<GeminiConfigType | null>(null)
   const [isConfigured, setIsConfigured] = useState(false)
 
   // Load configuration from localStorage on mount
   useEffect(() => {
-    const savedConfig = localStorage.getItem('dify-config')
+    const savedConfig = localStorage.getItem('gemini-config')
     if (savedConfig) {
       try {
         const parsedConfig = JSON.parse(savedConfig)
@@ -27,16 +27,16 @@ export default function ChatBotDemo() {
     }
   }, [])
 
-  const handleConfigSave = (newConfig: DifyConfigType) => {
+  const handleConfigSave = (newConfig: GeminiConfigType) => {
     setConfig(newConfig)
     setIsConfigured(true)
-    localStorage.setItem('dify-config', JSON.stringify(newConfig))
+    localStorage.setItem('gemini-config', JSON.stringify(newConfig))
   }
 
   const resetConfig = () => {
     setConfig(null)
     setIsConfigured(false)
-    localStorage.removeItem('dify-config')
+    localStorage.removeItem('gemini-config')
   }
 
   if (!isConfigured || !config) {
@@ -44,9 +44,9 @@ export default function ChatBotDemo() {
       <div className="container mx-auto p-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Dify AI Chatbot</h1>
+            <h1 className="text-3xl font-bold mb-2">Gemini AI Chatbot</h1>
             <p className="text-muted-foreground">
-              Connect to your Dify application and start chatting with AI
+              Connect to Google Gemini AI and start intelligent conversations
             </p>
           </div>
 
@@ -55,7 +55,7 @@ export default function ChatBotDemo() {
               <CardHeader>
                 <CardTitle>Getting Started</CardTitle>
                 <CardDescription>
-                  To use the chatbot, you need to configure your Dify API settings
+                  To use the chatbot, you need to configure your Gemini API settings
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -65,9 +65,9 @@ export default function ChatBotDemo() {
                       1
                     </div>
                     <div>
-                      <h3 className="font-semibold">Create a Dify Application</h3>
+                      <h3 className="font-semibold">Get Gemini API Key</h3>
                       <p className="text-sm text-muted-foreground">
-                        Go to your Dify dashboard and create a conversational application
+                        Visit Google AI Studio to obtain your free API key
                       </p>
                     </div>
                   </div>
@@ -77,9 +77,9 @@ export default function ChatBotDemo() {
                       2
                     </div>
                     <div>
-                      <h3 className="font-semibold">Get API Key</h3>
+                      <h3 className="font-semibold">Choose Model</h3>
                       <p className="text-sm text-muted-foreground">
-                        Navigate to Applications → Access API → Create API Key
+                        Select from Gemini 1.5 Flash (fast) or Gemini 1.5 Pro (advanced)
                       </p>
                     </div>
                   </div>
@@ -100,7 +100,7 @@ export default function ChatBotDemo() {
             </Card>
           </div>
 
-          <DifyConfig onConfigSave={handleConfigSave} initialConfig={config || undefined} />
+          <GeminiConfig onConfigSave={handleConfigSave} />
         </div>
       </div>
     )
@@ -110,13 +110,16 @@ export default function ChatBotDemo() {
     <div className="container mx-auto p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Dify AI Chatbot</h1>
+          <h1 className="text-3xl font-bold mb-2">Gemini AI Chatbot</h1>
           <p className="text-muted-foreground mb-4">
-            Connected to your Dify application
+            Connected to Google Gemini AI
           </p>
           <div className="flex justify-center gap-2">
             <Badge variant="secondary">
-              User: {config.user}
+              Model: {config.model}
+            </Badge>
+            <Badge variant={config.demoMode ? "default" : "outline"}>
+              {config.demoMode ? "Demo Mode" : "Production"}
             </Badge>
             <Badge 
               variant="outline" 
@@ -129,42 +132,41 @@ export default function ChatBotDemo() {
           </div>
         </div>
 
-        <Tabs defaultValue="streaming" className="w-full">
+        <Tabs defaultValue="enhanced" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="streaming" className="flex items-center gap-2">
+            <TabsTrigger value="enhanced" className="flex items-center gap-2">
               <Zap className="w-4 h-4" />
-              Streaming Chat
+              Enhanced Chat
             </TabsTrigger>
-            <TabsTrigger value="blocking" className="flex items-center gap-2">
+            <TabsTrigger value="standard" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
               Standard Chat
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="streaming" className="space-y-4">
+          <TabsContent value="enhanced" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="w-5 h-5" />
-                  Streaming Chat
+                  Enhanced Gemini Chat
                 </CardTitle>
                 <CardDescription>
-                  Real-time streaming responses for a more interactive experience
+                  Advanced interface with enhanced features and visual feedback
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <StreamingChatBot
+                <GeminiChatBot
                   apiKey={config.apiKey}
-                  baseUrl={config.baseUrl}
-                  user={config.user}
-                  title="AI Assistant (Streaming)"
+                  model={config.model}
+                  title="Gemini AI Assistant"
                   placeholder="Ask me anything..."
                 />
               </CardContent>
             </Card>
           </TabsContent>
           
-          <TabsContent value="blocking" className="space-y-4">
+          <TabsContent value="standard" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -172,16 +174,15 @@ export default function ChatBotDemo() {
                   Standard Chat
                 </CardTitle>
                 <CardDescription>
-                  Traditional request-response pattern with complete messages
+                  Simple, clean interface for straightforward conversations
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ChatBot
                   apiKey={config.apiKey}
-                  baseUrl={config.baseUrl}
-                  user={config.user}
-                  title="AI Assistant (Standard)"
-                  placeholder="Ask me anything..."
+                  model={config.model}
+                  title="Gemini Assistant"
+                  placeholder="Type your message..."
                 />
               </CardContent>
             </Card>
