@@ -262,156 +262,86 @@ export default function VidyosChatbot() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Header Section */}
-        <header className="text-center mb-8">
-          <div className="mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4 flex items-center justify-center gap-4">
-              <Brain className="w-10 h-10 md:w-12 md:h-12 text-gray-900" />
-              Vidyos
-              <div className={`ml-4 px-3 py-1 rounded-full text-xs font-medium border ${
-                isApiAvailable 
-                  ? 'bg-gray-100 text-gray-800 border-gray-300' 
-                  : 'bg-gray-50 text-gray-600 border-gray-200'
-              }`}>
-                {isCheckingApi ? (
-                  <div className="flex items-center gap-1">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    <span>Connecting...</span>
-                  </div>
-                ) : isApiAvailable ? (
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
-                    <span>Ready</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                    <span>Connecting</span>
-                  </div>
-                )}
-              </div>
-            </h1>
-            
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-              AI-powered assistant for intelligent conversations
-            </p>
-            
-            {apiError && (
-              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-gray-400 rounded-full"></div>
-                  <span className="font-medium">Connection Issue:</span>
-                </div>
-                <p className="mt-1">{apiError}</p>
-              </div>
-            )}
-          </div>
+        <header className="text-center mb-6">
+          <h1 className="text-3xl font-semibold text-black mb-2 flex items-center justify-center gap-3">
+            <Brain className="w-8 h-8 text-black" />
+            Vidyos
+          </h1>
+          
+          {apiError && (
+            <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded text-gray-700 text-sm">
+              <span className="font-medium">Connection Issue:</span> {apiError}
+            </div>
+          )}
         </header>
 
         {/* Quick Questions Section */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            {quickQuestions.map((question, index) => (
-              <button
-                key={index}
-                onClick={() => handleQuickQuestion(question)}
-                className={`text-left p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors duration-200 ${
-                  !isApiAvailable || isTyping ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                disabled={!isApiAvailable || isTyping}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gray-900 text-white rounded-lg flex items-center justify-center">
-                    <span className="text-sm font-bold">{index + 1}</span>
-                  </div>
-                  <span className="text-gray-800 font-medium">{question}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Chat Container */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-          {/* Chat Header */}
-          <div className="bg-gray-900 text-white p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-                <Bot className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Vidyos Assistant</h3>
-                <p className="text-gray-300 text-sm">AI-powered chat</p>
-              </div>
+        {messages.length === 0 && (
+          <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
+              {quickQuestions.map((question, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleQuickQuestion(question)}
+                  className={`text-left p-3 border border-gray-300 hover:border-black transition-colors duration-200 ${
+                    !isApiAvailable || isTyping ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  disabled={!isApiAvailable || isTyping}
+                >
+                  <span className="text-black">{question}</span>
+                </button>
+              ))}
             </div>
           </div>
+        )}
 
+        {/* Chat Container */}
+        <div className="bg-white border border-gray-300 overflow-hidden">
           {/* Messages Area */}
-          <div className="h-96 overflow-y-auto p-6 bg-gray-50">
-            <div className="space-y-6">
-              {messages.length === 0 && (
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="max-w-sm bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                    <p className="text-gray-800 leading-relaxed">
-                      {isApiAvailable ? (
-                        <>Hello! I'm Vidyos, your AI assistant. How can I help you today?</>
-                      ) : (
-                        <>Connecting to AI service...<//>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              )}
-              
+          <div className="h-96 overflow-y-auto p-4">
+            <div className="space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-4 ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+                  className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}
                 >
                   {/* Avatar */}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  <div className={`w-8 h-8 flex items-center justify-center flex-shrink-0 ${
                     message.role === "user" 
-                      ? "bg-gray-700" 
-                      : "bg-gray-900"
+                      ? "bg-black text-white" 
+                      : "bg-gray-200 text-black"
                   }`}>
                     {message.role === "user" ? 
-                      <User className="w-5 h-5 text-white" /> : 
-                      <Bot className="w-5 h-5 text-white" />
+                      <User className="w-4 h-4" /> : 
+                      <Bot className="w-4 h-4" />
                     }
                   </div>
 
                   {/* Message Bubble */}
-                  <div className={`max-w-sm lg:max-w-md p-4 rounded-lg shadow-sm border ${
+                  <div className={`max-w-md p-3 border ${
                     message.role === "user" 
-                      ? "bg-gray-900 text-white border-gray-800" 
-                      : "bg-white text-gray-800 border-gray-200"
+                      ? "bg-black text-white border-black" 
+                      : "bg-white text-black border-gray-300"
                   }`}>
-                    <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                    <div className={`text-xs mt-2 ${
-                      message.role === "user" ? "text-gray-300" : "text-gray-500"
-                    }`}>
-                      {message.timestamp.toLocaleTimeString()}
-                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               ))}
 
               {/* Typing Indicator */}
               {isTyping && (
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-white" />
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 bg-gray-200 text-black flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4" />
                   </div>
-                  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                  <div className="bg-white border border-gray-300 p-3">
                     <div className="flex gap-1">
                       {[0, 1, 2].map((i) => (
                         <div
                           key={i}
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                          className="w-1 h-1 bg-gray-400 rounded-full animate-pulse"
                           style={{ animationDelay: `${i * 0.2}s` }}
                         />
                       ))}
@@ -425,9 +355,9 @@ export default function VidyosChatbot() {
           </div>
 
           {/* Input Section */}
-          <div className="p-6 bg-white border-t border-gray-200">
+          <div className="p-4 bg-white border-t border-gray-300">
             <form onSubmit={handleSubmit}>
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <input
                   ref={inputRef}
                   type="text"
@@ -435,13 +365,13 @@ export default function VidyosChatbot() {
                   onChange={(e) => setCurrentInput(e.target.value)}
                   placeholder={isApiAvailable ? "Type your message..." : "Connecting..."}
                   disabled={!isApiAvailable || isTyping}
-                  className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-500 focus:bg-white focus:border-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-3 py-2 border border-gray-300 text-black placeholder-gray-500 focus:border-black focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 />
 
                 <button
                   type="submit"
                   disabled={!isApiAvailable || !currentInput.trim() || isTyping}
-                  className="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-black hover:bg-gray-800 text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   Send
@@ -450,13 +380,6 @@ export default function VidyosChatbot() {
             </form>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
-            Powered by Vidyos AI
-          </p>
-        </footer>
       </div>
     </div>
   )
