@@ -38,7 +38,7 @@ type Language = typeof LANGUAGES[number]['value']
 export function ChatBot({ 
   apiKey, 
   model = 'gemini-1.5-flash',
-  title = 'AI Assistant',
+  title = 'Vidyos',
   placeholder = 'Type your message...',
   className = ''
 }: ChatBotProps) {
@@ -150,21 +150,27 @@ export function ChatBot({
   }
 
   return (
-    <Card className={`w-full max-w-2xl mx-auto h-[600px] flex flex-col ${className}`}>
-      <CardHeader className="flex-shrink-0">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="w-5 h-5" />
+    <Card className={`w-full max-w-3xl mx-auto h-[700px] flex flex-col border-2 border-gray-800 bg-white shadow-2xl ${className}`}>
+      <CardHeader className="flex-shrink-0 bg-black text-white border-b border-gray-800">
+        <CardTitle className="flex items-center gap-3 text-xl font-bold">
+          <div className="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center">
+            <Bot className="w-5 h-5" />
+          </div>
           {title}
-          <div className="ml-auto flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Languages className="w-4 h-4" />
+          <div className="ml-auto flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-gray-900 px-3 py-1 rounded-lg border border-gray-700">
+              <Languages className="w-4 h-4 text-gray-300" />
               <Select value={selectedLanguage} onValueChange={(value: Language) => setSelectedLanguage(value)}>
-                <SelectTrigger className="w-[120px] h-8 text-xs">
+                <SelectTrigger className="w-[130px] h-8 text-sm bg-transparent border-gray-600 text-white hover:bg-gray-800">
                   <SelectValue placeholder="Language" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-black border-gray-700">
                   {LANGUAGES.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
+                    <SelectItem 
+                      key={lang.value} 
+                      value={lang.value}
+                      className="text-white hover:bg-gray-800 focus:bg-gray-800"
+                    >
                       {lang.label}
                     </SelectItem>
                   ))}
@@ -175,6 +181,7 @@ export function ChatBot({
               variant="outline" 
               size="sm" 
               onClick={clearChat}
+              className="border-gray-600 text-white hover:bg-gray-800 hover:text-white bg-transparent"
             >
               Clear Chat
             </Button>
@@ -182,57 +189,60 @@ export function ChatBot({
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="flex-1 overflow-hidden p-0">
-        <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
+      <CardContent className="flex-1 overflow-hidden p-0 bg-gray-50">
+        <ScrollArea className="h-full p-6" ref={scrollAreaRef}>
+          <div className="space-y-6">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                <Bot className="w-8 h-8 mx-auto mb-2" />
-                <p>Start a conversation with the AI assistant!</p>
+              <div className="text-center text-gray-500 py-12">
+                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Bot className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-semibold text-black mb-2">Welcome to Vidyos</h3>
+                <p>Start a conversation with our AI assistant!</p>
               </div>
             )}
             
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex gap-3 ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                className={`flex gap-4 ${message.isUser ? 'justify-end' : 'justify-start'}`}
               >
                 {!message.isUser && (
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback>
-                      <Bot className="w-4 h-4" />
+                  <Avatar className="w-10 h-10 border-2 border-black">
+                    <AvatarFallback className="bg-black text-white">
+                      <Bot className="w-5 h-5" />
                     </AvatarFallback>
                   </Avatar>
                 )}
                 
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
+                  className={`max-w-[75%] rounded-2xl p-4 shadow-lg ${
                     message.isUser
-                      ? 'bg-primary text-primary-foreground ml-auto'
-                      : 'bg-muted'
+                      ? 'bg-black text-white ml-auto'
+                      : 'bg-white border-2 border-gray-200'
                   }`}
                 >
                   {message.isUser ? (
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm leading-relaxed">{message.content}</p>
                   ) : (
-                    <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                    <div className="text-sm prose prose-sm max-w-none prose-gray">
                       <ReactMarkdown
                         components={{
-                          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                          strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                          em: ({ children }) => <em className="italic">{children}</em>,
+                          p: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed text-gray-800">{children}</p>,
+                          strong: ({ children }) => <strong className="font-bold text-black">{children}</strong>,
+                          em: ({ children }) => <em className="italic text-gray-700">{children}</em>,
                           code: ({ children }) => (
-                            <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">
+                            <code className="bg-gray-100 border border-gray-300 px-2 py-1 rounded text-xs font-mono">
                               {children}
                             </code>
                           ),
                           pre: ({ children }) => (
-                            <pre className="bg-slate-100 dark:bg-slate-800 p-2 rounded text-xs overflow-x-auto">
+                            <pre className="bg-gray-100 border border-gray-300 p-3 rounded-lg text-xs font-mono overflow-x-auto">
                               {children}
                             </pre>
                           ),
-                          ul: ({ children }) => <ul className="list-disc list-inside mb-2">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
+                          ul: ({ children }) => <ul className="list-disc list-inside mb-3 text-gray-800">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal list-inside mb-3 text-gray-800">{children}</ol>,
                           li: ({ children }) => <li className="mb-1">{children}</li>,
                         }}
                       >
@@ -240,15 +250,15 @@ export function ChatBot({
                       </ReactMarkdown>
                     </div>
                   )}
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs opacity-60 mt-2 font-medium">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
                 </div>
                 
                 {message.isUser && (
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
+                  <Avatar className="w-10 h-10 border-2 border-gray-400">
+                    <AvatarFallback className="bg-gray-100 text-black">
+                      <User className="w-5 h-5" />
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -256,16 +266,16 @@ export function ChatBot({
             ))}
             
             {isLoading && (
-              <div className="flex gap-3 justify-start">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback>
-                    <Bot className="w-4 h-4" />
+              <div className="flex gap-4 justify-start">
+                <Avatar className="w-10 h-10 border-2 border-black">
+                  <AvatarFallback className="bg-black text-white">
+                    <Bot className="w-5 h-5" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-muted rounded-lg p-3">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-sm">Thinking...</span>
+                <div className="bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-lg">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="w-5 h-5 animate-spin text-black" />
+                    <span className="text-sm font-medium text-gray-700">Vidyos is thinking...</span>
                   </div>
                 </div>
               </div>
@@ -274,18 +284,22 @@ export function ChatBot({
         </ScrollArea>
       </CardContent>
       
-      <CardFooter className="flex-shrink-0">
-        <form onSubmit={handleSubmit} className="flex gap-2 w-full">
+      <CardFooter className="flex-shrink-0 bg-white border-t border-gray-200 p-6">
+        <form onSubmit={handleSubmit} className="flex gap-3 w-full">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 h-12 px-4 border-2 border-gray-300 rounded-xl focus:border-black focus:ring-0 text-black placeholder-gray-500 bg-white"
           />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
-            <Send className="w-4 h-4" />
+          <Button 
+            type="submit" 
+            disabled={isLoading || !input.trim()}
+            className="h-12 px-6 bg-black text-white rounded-xl hover:bg-gray-800 disabled:bg-gray-400 transition-colors"
+          >
+            <Send className="w-5 h-5" />
           </Button>
         </form>
       </CardFooter>
