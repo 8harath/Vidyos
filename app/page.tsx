@@ -34,6 +34,7 @@ export default function VidyosChatbot() {
   const [isApiAvailable, setIsApiAvailable] = useState(false)
   const [isCheckingApi, setIsCheckingApi] = useState(true)
   const [apiError, setApiError] = useState<string | null>(null)
+  const [apiStatus, setApiStatus] = useState<'checking' | 'configured' | 'demo' | 'error'>('checking')
   const [conversationId, setConversationId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -69,14 +70,24 @@ export default function VidyosChatbot() {
     try {
       const response = await fetch('/api/dify/config')
       if (response.ok) {
-        setIsApiAvailable(true)
-        setApiError(null)
+        const data = await response.json()
+        if (data.demoMode) {
+          setApiStatus('demo')
+          setIsApiAvailable(true)
+          setApiError('Running in demo mode - configure Dify API for full functionality')
+        } else {
+          setApiStatus('configured')
+          setIsApiAvailable(true)
+          setApiError(null)
+        }
       } else {
         const errorData = await response.json()
+        setApiStatus('error')
         setIsApiAvailable(false)
         setApiError(errorData.error || 'API configuration error')
       }
     } catch (error) {
+      setApiStatus('error')
       setIsApiAvailable(false)
       setApiError('Unable to connect to server')
     } finally {
@@ -270,9 +281,24 @@ export default function VidyosChatbot() {
             Vidyos
           </h1>
           
-          {apiError && (
-            <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded text-gray-700 text-sm">
-              <span className="font-medium">Connection Issue:</span> {apiError}
+          {(apiError || apiStatus === 'demo') && (
+            <div className={`mt-4 p-3 border rounded text-sm ${
+              apiStatus === 'demo' 
+                ? 'bg-blue-50 border-blue-300 text-blue-700' 
+                : 'bg-gray-100 border-gray-300 text-gray-700'
+            }`}>
+              {apiStatus === 'demo' ? (
+                <div>
+                  <span className="font-medium">Demo Mode:</span> {apiError}
+                  <div className="mt-1 text-xs">
+                    Get your API key from <a href="https://dify.ai" target="_blank" rel="noopener noreferrer" className="underline">dify.ai</a> and configure it in your environment variables.
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <span className="font-medium">Connection Issue:</span> {apiError}
+                </div>
+              )}
             </div>
           )}
         </header>

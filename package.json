@@ -6,7 +6,9 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "verify-env": "node scripts/verify-env.js",
+    "setup": "node scripts/verify-env.js && npm run dev"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
