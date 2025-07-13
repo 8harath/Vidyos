@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Send, Bot, User, Loader2 } from 'lucide-react'
+import { Send, Bot, User, Loader2, Languages } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import ReactMarkdown from 'react-markdown'
 
 interface Message {
@@ -25,6 +26,15 @@ interface ChatBotProps {
   className?: string
 }
 
+const LANGUAGES = [
+  { value: 'english', label: 'English' },
+  { value: 'telugu', label: 'Telugu' },
+  { value: 'kannada', label: 'Kannada' },
+  { value: 'tamil', label: 'Tamil' }
+] as const
+
+type Language = typeof LANGUAGES[number]['value']
+
 export function ChatBot({ 
   apiKey, 
   model = 'gemini-1.5-flash',
@@ -36,6 +46,7 @@ export function ChatBot({
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('english')
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
@@ -65,13 +76,24 @@ export function ChatBot({
     setIsLoading(true)
 
     try {
+      // Prepare the query with language instruction
+      let queryWithLanguage = message
+      if (selectedLanguage !== 'english') {
+        const languageNames = {
+          telugu: 'Telugu',
+          kannada: 'Kannada',
+          tamil: 'Tamil'
+        }
+        queryWithLanguage = `Please respond in ${languageNames[selectedLanguage]} language. User query: ${message}`
+      }
+
       const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: message,
+          query: queryWithLanguage,
           conversationId: conversationId || undefined,
           responseMode: 'blocking'
         })
@@ -133,14 +155,30 @@ export function ChatBot({
         <CardTitle className="flex items-center gap-2">
           <Bot className="w-5 h-5" />
           {title}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={clearChat}
-            className="ml-auto"
-          >
-            Clear Chat
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Languages className="w-4 h-4" />
+              <Select value={selectedLanguage} onValueChange={(value: Language) => setSelectedLanguage(value)}>
+                <SelectTrigger className="w-[120px] h-8 text-xs">
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={clearChat}
+            >
+              Clear Chat
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       
