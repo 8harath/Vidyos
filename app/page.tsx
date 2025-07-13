@@ -25,7 +25,7 @@ const quickQuestions = [
   "What is machine learning?",
 ]
 
-export default function VidyosChatbot() {
+export default function GeminiChatbot() {
   const [messages, setMessages] = useState<Message[]>([])
   const [currentInput, setCurrentInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
@@ -49,7 +49,7 @@ export default function VidyosChatbot() {
 
   // Load chat data from localStorage on component mount
   useEffect(() => {
-    const savedChatData = localStorage.getItem('vidyos-chat-data')
+    const savedChatData = localStorage.getItem('gemini-chat-data')
     if (savedChatData) {
       const parsedData = JSON.parse(savedChatData)
       // Convert timestamp strings back to Date objects
@@ -97,7 +97,7 @@ export default function VidyosChatbot() {
 
   // Save chat data to localStorage whenever chatData changes
   useEffect(() => {
-    localStorage.setItem('vidyos-chat-data', JSON.stringify(chatData))
+    localStorage.setItem('gemini-chat-data', JSON.stringify(chatData))
   }, [chatData])
 
   const generateChatTitle = (firstMessage: string): string => {
@@ -276,8 +276,8 @@ export default function VidyosChatbot() {
         {/* Header Section */}
         <header className="text-center mb-6">
           <h1 className="text-3xl font-semibold text-black mb-2 flex items-center justify-center gap-3">
-            <Brain className="w-8 h-8 text-black" />
-            Vidyos
+            <Brain className="w-8 h-8 text-blue-600" />
+            Gemini AI
           </h1>
           
           {(apiError || apiStatus === 'demo') && (
