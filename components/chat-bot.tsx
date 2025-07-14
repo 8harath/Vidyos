@@ -19,8 +19,6 @@ interface Message {
 }
 
 interface ChatBotProps {
-  apiKey?: string
-  model?: string
   title?: string
   placeholder?: string
   className?: string
@@ -36,8 +34,6 @@ const LANGUAGES = [
 type Language = typeof LANGUAGES[number]['value']
 
 export function ChatBot({ 
-  apiKey, 
-  model = 'gemini-1.5-flash',
   title = 'Vidyos',
   placeholder = 'Type your message...',
   className = ''
@@ -87,15 +83,14 @@ export function ChatBot({
         queryWithLanguage = `Please respond in ${languageNames[selectedLanguage]} language. User query: ${message}`
       }
 
-      const response = await fetch('/api/gemini', {
+      const response = await fetch('/api/sarvam', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: queryWithLanguage,
-          conversationId: conversationId || undefined,
-          responseMode: 'blocking'
+          input: queryWithLanguage,
+          conversationId: conversationId || undefined
         })
       })
 
