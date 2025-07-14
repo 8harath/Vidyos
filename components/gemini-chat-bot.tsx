@@ -134,10 +134,10 @@ export function SarvamChatBot({
   }
 
   return (
-    <Card className={`w-full max-w-2xl mx-auto h-[600px] flex flex-col ${className}`}>
-      <CardHeader className="flex-shrink-0">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-blue-500" />
+    <Card className={`w-full max-w-2xl mx-auto h-[600px] flex flex-col bg-white border border-black ${className}`}>
+      <CardHeader className="flex-shrink-0 border-b border-black bg-white">
+        <CardTitle className="flex items-center gap-2 text-black">
+          <Bot className="w-5 h-5 text-black" />
           {title}
           <div className="ml-auto flex gap-2">
             {isLoading && (
@@ -145,7 +145,7 @@ export function SarvamChatBot({
                 variant="outline" 
                 size="sm" 
                 onClick={stopGeneration}
-                className="text-red-500 hover:text-red-700"
+                className="text-black border-black hover:bg-gray-100"
               >
                 <X className="w-4 h-4 mr-1" />
                 Stop
@@ -156,20 +156,21 @@ export function SarvamChatBot({
               size="sm" 
               onClick={clearChat}
               disabled={isLoading}
+              className="text-black border-black hover:bg-gray-100"
             >
               Clear Chat
             </Button>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden p-0">
+      <CardContent className="flex-1 overflow-hidden p-0 bg-white">
         <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                <Bot className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                <p className="font-medium">Welcome to Sarvam AI Assistant!</p>
-                <p className="text-sm mt-1">Start a conversation to explore AI capabilities</p>
+              <div className="text-center text-gray-500 py-8">
+                <Bot className="w-8 h-8 mx-auto mb-2 text-black" />
+                <p className="font-medium text-black">Welcome to Sarvam AI Assistant!</p>
+                <p className="text-sm mt-1 text-gray-700">Start a conversation to explore AI capabilities</p>
               </div>
             )}
             {messages.map((message) => (
@@ -179,35 +180,35 @@ export function SarvamChatBot({
               >
                 {!message.isUser && (
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-blue-100">
-                      <Bot className="w-4 h-4 text-blue-600" />
+                    <AvatarFallback className="bg-gray-200">
+                      <Bot className="w-4 h-4 text-black" />
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     message.isUser
-                      ? 'bg-primary text-primary-foreground ml-auto'
-                      : 'bg-muted'
-                  }`}
+                      ? 'bg-black text-white ml-auto'
+                      : 'bg-gray-100 text-black'
+                  } border border-black`}
                 >
                   <p className="text-sm whitespace-pre-wrap">
                     {message.content}
                     {message.isStreaming && (
-                      <span className="inline-block w-2 h-4 bg-current ml-1 animate-pulse" />
+                      <span className="inline-block w-2 h-4 bg-black ml-1 animate-pulse" />
                     )}
                   </p>
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs opacity-70 mt-1 text-gray-700">
                     {message.timestamp.toLocaleTimeString()}
                     {message.isStreaming && (
-                      <span className="ml-2 text-blue-500">Generating...</span>
+                      <span className="ml-2 text-black">Generating...</span>
                     )}
                   </p>
                 </div>
                 {message.isUser && (
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
+                    <AvatarFallback className="bg-black">
+                      <User className="w-4 h-4 text-white" />
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -216,14 +217,14 @@ export function SarvamChatBot({
             {isLoading && messages.every(m => !m.isStreaming) && (
               <div className="flex gap-3 justify-start">
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-blue-100">
-                    <Bot className="w-4 h-4 text-blue-600" />
+                  <AvatarFallback className="bg-gray-200">
+                    <Bot className="w-4 h-4 text-black" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-muted rounded-lg p-3">
+                <div className="bg-gray-100 rounded-lg p-3 border border-black">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                    <span className="text-sm">Thinking...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-black" />
+                    <span className="text-sm text-black">Thinking...</span>
                   </div>
                 </div>
               </div>
@@ -231,7 +232,7 @@ export function SarvamChatBot({
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="flex-shrink-0">
+      <CardFooter className="flex-shrink-0 bg-white border-t border-black">
         <form onSubmit={handleSubmit} className="flex gap-2 w-full">
           <Input
             value={input}
@@ -239,9 +240,9 @@ export function SarvamChatBot({
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 bg-white text-black border border-black"
           />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
+          <Button type="submit" disabled={isLoading || !input.trim()} className="bg-black text-white border border-black">
             <Send className="w-4 h-4" />
           </Button>
         </form>
