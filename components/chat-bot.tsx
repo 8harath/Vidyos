@@ -34,6 +34,8 @@ const LANGUAGES = [
 
 type Language = typeof LANGUAGES[number]['value']
 
+const CHAT_HISTORY_KEY = 'vidyos-chat-history';
+
 export function ChatBot({ 
   title = 'Vidyos',
   placeholder = 'Type your message...',
@@ -56,6 +58,32 @@ export function ChatBot({
       }
     }
   }, [messages])
+
+  // Load chat history from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        // Convert timestamp back to Date
+        if (Array.isArray(parsed)) {
+          setMessages(parsed.map((msg) => ({ ...msg, timestamp: new Date(msg.timestamp) })));
+        }
+      } catch {}
+    }
+  }, []);
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem(
+        CHAT_HISTORY_KEY,
+        JSON.stringify(messages)
+      );
+    } else {
+      localStorage.removeItem(CHAT_HISTORY_KEY);
+    }
+  }, [messages]);
 
   const sendMessage = async (message: string) => {
     if (!message.trim() || isLoading) return
@@ -143,6 +171,7 @@ export function ChatBot({
   const clearChat = () => {
     setMessages([])
     setConversationId(null)
+    localStorage.removeItem(CHAT_HISTORY_KEY)
   }
 
   return (
