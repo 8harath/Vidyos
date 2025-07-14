@@ -53,13 +53,6 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
     
     try {
 // ...existing code...
-export interface SarvamConfig {
-  apiKey: string
-  demoMode: boolean
-  enableFallback: boolean
-}
-
-export function SarvamConfig({ onConfigSave, className = '' }: { onConfigSave?: (config: SarvamConfig) => void, className?: string }) {
   const [config, setConfig] = useState<SarvamConfig>({
     apiKey: '',
     demoMode: false,
