@@ -10,6 +10,7 @@ import { Send, Bot, User, Loader2, Languages } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import ReactMarkdown from 'react-markdown'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Message {
   id: string
@@ -186,39 +187,48 @@ export function ChatBot({
       
       <CardContent className="flex-1 overflow-hidden p-0 bg-gray-50">
         <ScrollArea className="h-full p-6" ref={scrollAreaRef}>
-          <div className="space-y-6">
-            {messages.length === 0 && (
-              <div className="text-center text-gray-500 py-12">
-                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
+          <AnimatePresence initial={false}>
+            {messages.length === 0 && !isLoading && (
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.4 }}
+                className="text-center text-gray-400 py-16"
+              >
+                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <Bot className="w-8 h-8" />
                 </div>
                 <h3 className="text-lg font-semibold text-black mb-2">Welcome to Vidyos</h3>
-                <p>Start a conversation with our AI assistant!</p>
-              </div>
+                <p className="text-gray-500">Start a conversation with our AI assistant!</p>
+              </motion.div>
             )}
-            
             {messages.map((message) => (
-              <div
+              <motion.div
                 key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
                 className={`flex gap-4 ${message.isUser ? 'justify-end' : 'justify-start'}`}
               >
                 {!message.isUser && (
-                  <Avatar className="w-10 h-10 border-2 border-black">
+                  <Avatar className="w-10 h-10 border-2 border-black shadow-md">
                     <AvatarFallback className="bg-black text-white">
                       <Bot className="w-5 h-5" />
                     </AvatarFallback>
                   </Avatar>
                 )}
-                
                 <div
-                  className={`max-w-[75%] rounded-2xl p-4 shadow-lg ${
+                  className={`max-w-[75%] rounded-2xl p-4 shadow-xl transition-all duration-300 ${
                     message.isUser
-                      ? 'bg-black text-white ml-auto'
-                      : 'bg-white border-2 border-gray-200'
+                      ? 'bg-gradient-to-br from-black to-gray-800 text-white ml-auto'
+                      : 'bg-white border border-gray-200'
                   }`}
                 >
                   {message.isUser ? (
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <p className="text-sm leading-relaxed break-words">{message.content}</p>
                   ) : (
                     <div className="text-sm prose prose-sm max-w-none prose-gray">
                       <ReactMarkdown
@@ -245,37 +255,40 @@ export function ChatBot({
                       </ReactMarkdown>
                     </div>
                   )}
-                  <p className="text-xs opacity-60 mt-2 font-medium">
+                  <p className="text-xs opacity-60 mt-2 font-medium text-right">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
                 </div>
-                
                 {message.isUser && (
-                  <Avatar className="w-10 h-10 border-2 border-gray-400">
+                  <Avatar className="w-10 h-10 border-2 border-gray-400 shadow-md">
                     <AvatarFallback className="bg-gray-100 text-black">
                       <User className="w-5 h-5" />
                     </AvatarFallback>
                   </Avatar>
                 )}
-              </div>
+              </motion.div>
             ))}
-            
             {isLoading && (
-              <div className="flex gap-4 justify-start">
-                <Avatar className="w-10 h-10 border-2 border-black">
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="flex gap-4 justify-start"
+              >
+                <Avatar className="w-10 h-10 border-2 border-black shadow-md">
                   <AvatarFallback className="bg-black text-white">
                     <Bot className="w-5 h-5" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <Loader2 className="w-5 h-5 animate-spin text-black" />
-                    <span className="text-sm font-medium text-gray-700">Vidyos is thinking...</span>
-                  </div>
+                <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xl flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-black" />
+                  <span className="text-sm font-medium text-gray-700">Vidyos is thinking...</span>
                 </div>
-              </div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </ScrollArea>
       </CardContent>
       
@@ -287,12 +300,13 @@ export function ChatBot({
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             disabled={isLoading}
-            className="flex-1 h-12 px-4 border-2 border-gray-300 rounded-xl focus:border-black focus:ring-0 text-black placeholder-gray-500 bg-white"
+            className="flex-1 h-12 px-4 border-2 border-gray-200 rounded-xl focus:border-black focus:ring-0 text-black placeholder-gray-400 bg-white shadow-sm transition-all duration-200"
+            autoFocus
           />
           <Button 
             type="submit" 
             disabled={isLoading || !input.trim()}
-            className="h-12 px-6 bg-black text-white rounded-xl hover:bg-gray-800 disabled:bg-gray-400 transition-colors"
+            className="h-12 px-6 bg-black text-white rounded-xl hover:bg-gray-900 disabled:bg-gray-300 transition-colors shadow-md"
           >
             <Send className="w-5 h-5" />
           </Button>
