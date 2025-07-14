@@ -43,30 +43,7 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
     if (!config.demoMode && !config.apiKey.trim()) {
       toast({
         title: "Validation Error",
-        description: "API key is required when demo mode is disabled",
-        variant: "destructive"
-      })
-      return
-    }
-
-    setIsLoading(true)
-    
-    try {
-// ...existing code...
-  const [config, setConfig] = useState<SarvamConfig>({
-    apiKey: '',
-    demoMode: false,
-    enableFallback: true
-  })
-  const [showApiKey, setShowApiKey] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-
-  const handleSave = async () => {
-    if (!config.demoMode && !config.apiKey.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "API key is required when demo mode is disabled",
+        description: "API key is required when demo mode is disabled.",
         variant: "destructive"
       })
       return
@@ -81,10 +58,7 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
           },
           body: JSON.stringify({
             input: 'Hello, this is a test message',
-            source_language_code: 'auto',
-            target_language_code: 'hi-IN',
-            speaker_gender: 'Male',
-            testMode: true
+            // Remove testMode and hardcoded language codes for production
           })
         })
         if (!testResponse.ok) {
@@ -94,7 +68,7 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
       onConfigSave?.(config)
       toast({
         title: "Configuration Saved",
-        description: "Your Sarvam AI API configuration has been saved successfully!",
+        description: "Your Gemini API configuration has been saved successfully!",
       })
     } catch (error) {
       console.error('Config validation error:', error)
@@ -106,7 +80,6 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
     } finally {
       setIsLoading(false)
     }
-  }
 
   const handleReset = () => {
     setConfig({
@@ -225,4 +198,3 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
     </Card>
   )
 }
-            </>
