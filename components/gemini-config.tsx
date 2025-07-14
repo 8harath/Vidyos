@@ -80,6 +80,7 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
     } finally {
       setIsLoading(false)
     }
+  }
 
   const handleReset = () => {
     setConfig({
