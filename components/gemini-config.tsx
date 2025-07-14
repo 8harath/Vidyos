@@ -52,7 +52,34 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
     setIsLoading(true)
     
     try {
-      // Test the configuration with a simple request
+// ...existing code...
+export interface SarvamConfig {
+  apiKey: string
+  demoMode: boolean
+  enableFallback: boolean
+}
+
+export function SarvamConfig({ onConfigSave, className = '' }: { onConfigSave?: (config: SarvamConfig) => void, className?: string }) {
+  const [config, setConfig] = useState<SarvamConfig>({
+    apiKey: '',
+    demoMode: false,
+    enableFallback: true
+  })
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+
+  const handleSave = async () => {
+    if (!config.demoMode && !config.apiKey.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "API key is required when demo mode is disabled",
+        variant: "destructive"
+      })
+      return
+    }
+    setIsLoading(true)
+    try {
       if (!config.demoMode && config.apiKey.trim()) {
         const testResponse = await fetch('/api/gemini', {
           method: 'POST',
@@ -60,21 +87,21 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            query: 'Hello, this is a test message',
+            input: 'Hello, this is a test message',
+            source_language_code: 'auto',
+            target_language_code: 'hi-IN',
+            speaker_gender: 'Male',
             testMode: true
           })
         })
-
         if (!testResponse.ok) {
           throw new Error('Failed to validate API configuration')
         }
       }
-
       onConfigSave?.(config)
-      
       toast({
         title: "Configuration Saved",
-        description: "Your Gemini API configuration has been saved successfully!",
+        description: "Your Sarvam AI API configuration has been saved successfully!",
       })
     } catch (error) {
       console.error('Config validation error:', error)
@@ -91,7 +118,6 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
   const handleReset = () => {
     setConfig({
       apiKey: '',
-      model: 'gemini-1.5-flash',
       demoMode: false,
       enableFallback: true
     })
@@ -103,13 +129,12 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="w-5 h-5" />
-          Gemini Configuration
+          Sarvam AI Configuration
         </CardTitle>
         <CardDescription>
-          Configure your Google Gemini API settings for the chatbot
+          Configure your Sarvam AI API settings for the chatbot
         </CardDescription>
       </CardHeader>
-      
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -126,15 +151,14 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
             Enable demo mode to test without an API key
           </p>
         </div>
-
         {!config.demoMode && (
           <div className="space-y-2">
-            <Label htmlFor="api-key">Gemini API Key</Label>
+            <Label htmlFor="api-key">Sarvam AI API Key</Label>
             <div className="relative">
               <Input
                 id="api-key"
                 type={showApiKey ? "text" : "password"}
-                placeholder="Enter your Gemini API key"
+                placeholder="Enter your Sarvam AI API key"
                 value={config.apiKey}
                 onChange={(e) => 
                   setConfig(prev => ({ ...prev, apiKey: e.target.value }))
@@ -156,40 +180,10 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              Get your API key from{' '}
-              <a 
-                href="https://makersuite.google.com/app/apikey" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                Google AI Studio
-              </a>
+              Get your API key from Sarvam AI dashboard.
             </p>
           </div>
         )}
-
-        <div className="space-y-2">
-          <Label htmlFor="model">Model</Label>
-          <Select
-            value={config.model}
-            onValueChange={(value) => 
-              setConfig(prev => ({ ...prev, model: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select a model" />
-            </SelectTrigger>
-            <SelectContent>
-              {GEMINI_MODELS.map((model) => (
-                <SelectItem key={model.value} value={model.value}>
-                  {model.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="enable-fallback">Enable Fallback</Label>
@@ -206,7 +200,6 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
           </p>
         </div>
       </CardContent>
-      
       <CardFooter className="flex gap-2">
         <Button 
           variant="outline" 
@@ -237,3 +230,4 @@ export function GeminiConfig({ onConfigSave, className = '' }: GeminiConfigProps
     </Card>
   )
 }
+            </>
