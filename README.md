@@ -1,22 +1,21 @@
-# Vidyos - Gemini AI Chatbot Application
+# Vidyos - Sarvam AI Chatbot Application
 
-A modern, production-ready AI chatbot application built with Next.js and Google Gemini AI integration.
+A modern, production-ready AI chatbot application built with Next.js and Sarvam AI integration.
 
-![Vidyos Chatbot](https://img.shields.io/badge/Status-Production%20Ready-green)
-![Next.js](https://img.shields.io/badge/Next.js-14.2.16-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
-![Gemini](https://img.shields.io/badge/Gemini-AI-blue)
+![Vidyos Chatbot](https://img.shields.io/badge/Status-Production%20Ready-black)
+![Next.js](https://img.shields.io/badge/Next.js-14.2.16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-Ready-black)
+![SarvamAI](https://img.shields.io/badge/Sarvam-AI-black)
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Conversations**: Integration with Google Gemini AI for intelligent responses
+- 🤖 **AI-Powered Conversations**: Integration with Sarvam AI for intelligent responses
 - 💬 **Real-time Chat**: Instant messaging with typing indicators
 - 📱 **Responsive Design**: Works perfectly on desktop and mobile
 - 🔄 **Persistent Chat History**: Conversations saved in localStorage
 - 🛡️ **Production Ready**: Error handling, fallback responses, and health checks
-- 🎨 **Modern UI**: Clean, professional interface with Tailwind CSS
+- 🎨 **Minimal UI**: Clean, professional interface with only black, white, and their shades
 - 🚀 **Demo Mode**: Test the application without API configuration
-- 🧠 **Multiple Models**: Support for Gemini 1.5 Flash, Pro, and other models
 
 ## 🚀 Quick Start
 
@@ -24,7 +23,7 @@ A modern, production-ready AI chatbot application built with Next.js and Google 
 
 - Node.js 18.x or higher
 - npm or pnpm package manager
-- Google Gemini API key (get it from [Google AI Studio](https://makersuite.google.com/app/apikey))
+- Sarvam AI API key (get it from your Sarvam AI dashboard)
 
 ### Installation
 
@@ -48,8 +47,7 @@ A modern, production-ready AI chatbot application built with Next.js and Google 
 
 4. **Configure your API key** in `.env.local`:
    ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
-   GEMINI_MODEL=gemini-1.5-flash
+   SARVAM_API_KEY=your_sarvam_api_key_here
    DEMO_MODE=false
    ENABLE_FALLBACK=true
    ```

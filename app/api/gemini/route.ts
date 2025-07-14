@@ -1,25 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { SarvamAI } from 'sarvamai'
 
 // Demo responses for when API is not configured
 const demoResponses = [
-  "I'm currently running in demo mode. To get real AI responses, please configure your Gemini API key. I can help you with various topics including technology, general knowledge, and problem-solving!",
-  "This is a demonstration response. For full AI capabilities, please set up your Gemini API configuration. I'm designed to assist with questions, provide explanations, and engage in helpful conversations.",
-  "Demo mode is active! To unlock the full potential of this AI assistant, configure your Gemini API settings. I can help with research, explanations, coding assistance, and much more!",
-  "You're seeing a sample response since the API is in demo mode. Once properly configured with Gemini, I'll provide intelligent, context-aware responses to all your questions and requests."
+  "I'm currently running in demo mode. To get real AI responses, please configure your Sarvam AI API key. I can help you with various topics including technology, general knowledge, and problem-solving!",
+  "This is a demonstration response. For full AI capabilities, please set up your Sarvam AI API configuration. I'm designed to assist with questions, provide explanations, and engage in helpful conversations.",
+  "Demo mode is active! To unlock the full potential of this AI assistant, configure your Sarvam AI API settings. I can help with research, explanations, coding assistance, and much more!",
+  "You're seeing a sample response since the API is in demo mode. Once properly configured with Sarvam AI, I'll provide intelligent, context-aware responses to all your questions and requests."
 ]
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
     // Use environment variables for API configuration
-    const apiKey = process.env.GEMINI_API_KEY
-    const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash'
+    const apiKey = process.env.SARVAM_API_KEY
     const publicAccess = process.env.PUBLIC_ACCESS !== 'false'
     const demoMode = process.env.DEMO_MODE === 'true'
     const enableFallback = process.env.ENABLE_FALLBACK === 'true'
-    
+
     // Check if public access is enabled
     if (!publicAccess) {
       return NextResponse.json(
@@ -27,12 +25,12 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       )
     }
-    
-    const { query, conversationId, responseMode } = body
 
-    if (!query) {
+    const { input, source_language_code, target_language_code, speaker_gender } = body
+
+    if (!input) {
       return NextResponse.json(
-        { error: 'Query is required' },
+        { error: 'Input text is required' },
         { status: 400 }
       )
     }
@@ -40,65 +38,54 @@ export async function POST(request: NextRequest) {
     // Handle demo mode
     if (demoMode || !apiKey) {
       const demoResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)]
-      
       return NextResponse.json({
         answer: demoResponse,
-        conversation_id: conversationId || `demo-${Date.now()}`,
+        conversation_id: `demo-${Date.now()}`,
         message_id: `demo-msg-${Date.now()}`,
         mode: 'demo',
         created_at: Math.floor(Date.now() / 1000)
       })
     }
 
-    // Initialize Gemini AI
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: modelName })
-
+    // Initialize Sarvam AI
+    const client = new SarvamAI({ api_subscription_key: apiKey })
     try {
-      // Generate response using Gemini
-      const result = await model.generateContent(query)
-      const response = await result.response
-      const text = response.text()
-
-      return NextResponse.json({
-        answer: text,
-        conversation_id: conversationId || `gemini-${Date.now()}`,
-        message_id: `gemini-msg-${Date.now()}`,
-        mode: 'gemini',
-        created_at: Math.floor(Date.now() / 1000)
+      const response = await client.text.translate({
+        input,
+        source_language_code: source_language_code || 'auto',
+        target_language_code: target_language_code || 'hi-IN',
+        speaker_gender: speaker_gender || 'Male'
       })
 
-    } catch (geminiError) {
-      console.error('Gemini API Error:', geminiError)
-      
-      // Use fallback response if enabled
+      return NextResponse.json({
+        answer: response,
+        conversation_id: `sarvam-${Date.now()}`,
+        message_id: `sarvam-msg-${Date.now()}`,
+        mode: 'sarvam',
+        created_at: Math.floor(Date.now() / 1000)
+      })
+    } catch (sarvamError) {
+      console.error('Sarvam AI Error:', sarvamError)
       if (enableFallback) {
-        const fallbackResponse = "I'm having trouble connecting to my AI service right now, but I'm still here to help! This is a fallback response. Please try again in a moment, or contact support if the issue persists."
-        
+        const fallbackResponse = "I'm having trouble connecting to Sarvam AI right now, but I'm still here to help! This is a fallback response. Please try again in a moment, or contact support if the issue persists."
         return NextResponse.json({
           answer: fallbackResponse,
-          conversation_id: conversationId || `fallback-${Date.now()}`,
+          conversation_id: `fallback-${Date.now()}`,
           message_id: `fallback-msg-${Date.now()}`,
           mode: 'fallback',
           created_at: Math.floor(Date.now() / 1000)
         })
       }
-      
       return NextResponse.json(
-        { error: `AI service temporarily unavailable` },
+        { error: `Sarvam AI service temporarily unavailable` },
         { status: 503 }
       )
     }
-
   } catch (error) {
     console.error('API Error:', error)
-    
     const enableFallback = process.env.ENABLE_FALLBACK === 'true'
-    
-    // Use fallback response if enabled
     if (enableFallback) {
       const fallbackResponse = "I encountered an unexpected issue, but I'm still here to assist you! This is a fallback response while I resolve the technical difficulty. Please try again shortly."
-      
       return NextResponse.json({
         answer: fallbackResponse,
         conversation_id: `error-fallback-${Date.now()}`,
@@ -107,7 +94,6 @@ export async function POST(request: NextRequest) {
         created_at: Math.floor(Date.now() / 1000)
       })
     }
-    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

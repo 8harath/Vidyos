@@ -16,30 +16,26 @@ interface Message {
   timestamp: Date
   isStreaming?: boolean
 }
-
-interface GeminiChatBotProps {
+// ...existing code...
+interface SarvamChatBotProps {
   apiKey?: string
-  model?: string
   title?: string
   placeholder?: string
   className?: string
 }
 
-export function GeminiChatBot({ 
+export function SarvamChatBot({ 
   apiKey, 
-  model = 'gemini-1.5-flash',
-  title = 'Gemini AI Assistant',
+  title = 'Sarvam AI Assistant',
   placeholder = 'Type your message...',
   className = ''
-}: GeminiChatBotProps) {
+}: SarvamChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [conversationId, setConversationId] = useState<string | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
-  // Auto-scroll to bottom when new messages are added
   useEffect(() => {
     if (scrollAreaRef.current) {
       const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
@@ -52,7 +48,6 @@ export function GeminiChatBot({
   const sendMessage = async (message: string) => {
     if (!message.trim() || isLoading) return
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content: message,
@@ -64,7 +59,6 @@ export function GeminiChatBot({
     setInput('')
     setIsLoading(true)
 
-    // Add a placeholder message for the AI response
     const aiMessageId = (Date.now() + 1).toString()
     const streamingMessage: Message = {
       id: aiMessageId,
@@ -83,9 +77,10 @@ export function GeminiChatBot({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: message,
-          conversationId: conversationId || undefined,
-          responseMode: 'blocking'
+          input: message,
+          source_language_code: 'auto',
+          target_language_code: 'hi-IN',
+          speaker_gender: 'Male'
         })
       })
 
@@ -94,16 +89,8 @@ export function GeminiChatBot({
       }
 
       const data = await response.json()
-      
-      // Update conversation ID if it's a new conversation
-      if (data.conversation_id && !conversationId) {
-        setConversationId(data.conversation_id)
-      }
-
-      // Simulate streaming by updating the message content
       const fullResponse = data.answer || 'Sorry, I couldn\'t generate a response.'
-      
-      // Update the streaming message with the complete response
+
       setMessages(prev => 
         prev.map(msg => 
           msg.id === aiMessageId 
@@ -114,10 +101,7 @@ export function GeminiChatBot({
 
     } catch (error) {
       console.error('Error sending message:', error)
-      
-      // Remove the streaming message and show error
       setMessages(prev => prev.filter(msg => msg.id !== aiMessageId))
-      
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to send message",
@@ -142,20 +126,18 @@ export function GeminiChatBot({
 
   const clearChat = () => {
     setMessages([])
-    setConversationId(null)
   }
 
   const stopGeneration = () => {
     setIsLoading(false)
-    // Remove any streaming messages
     setMessages(prev => prev.filter(msg => !msg.isStreaming))
   }
 
   return (
-    <Card className={`w-full max-w-2xl mx-auto h-[600px] flex flex-col ${className}`}>
-      <CardHeader className="flex-shrink-0">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-blue-500" />
+    <Card className={`w-full max-w-2xl mx-auto h-[600px] flex flex-col bg-white border border-black ${className}`}>
+      <CardHeader className="flex-shrink-0 border-b border-black bg-white">
+        <CardTitle className="flex items-center gap-2 text-black">
+          <Bot className="w-5 h-5 text-black" />
           {title}
           <div className="ml-auto flex gap-2">
             {isLoading && (
@@ -163,7 +145,7 @@ export function GeminiChatBot({
                 variant="outline" 
                 size="sm" 
                 onClick={stopGeneration}
-                className="text-red-500 hover:text-red-700"
+                className="text-black border-black hover:bg-gray-100"
               >
                 <X className="w-4 h-4 mr-1" />
                 Stop
@@ -174,24 +156,23 @@ export function GeminiChatBot({
               size="sm" 
               onClick={clearChat}
               disabled={isLoading}
+              className="text-black border-black hover:bg-gray-100"
             >
               Clear Chat
             </Button>
           </div>
         </CardTitle>
       </CardHeader>
-      
-      <CardContent className="flex-1 overflow-hidden p-0">
+      <CardContent className="flex-1 overflow-hidden p-0 bg-white">
         <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                <Bot className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                <p className="font-medium">Welcome to Gemini AI Assistant!</p>
-                <p className="text-sm mt-1">Start a conversation to explore AI capabilities</p>
+              <div className="text-center text-gray-500 py-8">
+                <Bot className="w-8 h-8 mx-auto mb-2 text-black" />
+                <p className="font-medium text-black">Welcome to Sarvam AI Assistant!</p>
+                <p className="text-sm mt-1 text-gray-700">Start a conversation to explore AI capabilities</p>
               </div>
             )}
-            
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -199,54 +180,51 @@ export function GeminiChatBot({
               >
                 {!message.isUser && (
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-blue-100">
-                      <Bot className="w-4 h-4 text-blue-600" />
+                    <AvatarFallback className="bg-gray-200">
+                      <Bot className="w-4 h-4 text-black" />
                     </AvatarFallback>
                   </Avatar>
                 )}
-                
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     message.isUser
-                      ? 'bg-primary text-primary-foreground ml-auto'
-                      : 'bg-muted'
-                  }`}
+                      ? 'bg-black text-white ml-auto'
+                      : 'bg-gray-100 text-black'
+                  } border border-black`}
                 >
                   <p className="text-sm whitespace-pre-wrap">
                     {message.content}
                     {message.isStreaming && (
-                      <span className="inline-block w-2 h-4 bg-current ml-1 animate-pulse" />
+                      <span className="inline-block w-2 h-4 bg-black ml-1 animate-pulse" />
                     )}
                   </p>
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs opacity-70 mt-1 text-gray-700">
                     {message.timestamp.toLocaleTimeString()}
                     {message.isStreaming && (
-                      <span className="ml-2 text-blue-500">Generating...</span>
+                      <span className="ml-2 text-black">Generating...</span>
                     )}
                   </p>
                 </div>
-                
                 {message.isUser && (
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
+                    <AvatarFallback className="bg-black">
+                      <User className="w-4 h-4 text-white" />
                     </AvatarFallback>
                   </Avatar>
                 )}
               </div>
             ))}
-            
             {isLoading && messages.every(m => !m.isStreaming) && (
               <div className="flex gap-3 justify-start">
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-blue-100">
-                    <Bot className="w-4 h-4 text-blue-600" />
+                  <AvatarFallback className="bg-gray-200">
+                    <Bot className="w-4 h-4 text-black" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-muted rounded-lg p-3">
+                <div className="bg-gray-100 rounded-lg p-3 border border-black">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                    <span className="text-sm">Thinking...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-black" />
+                    <span className="text-sm text-black">Thinking...</span>
                   </div>
                 </div>
               </div>
@@ -254,8 +232,7 @@ export function GeminiChatBot({
           </div>
         </ScrollArea>
       </CardContent>
-      
-      <CardFooter className="flex-shrink-0">
+      <CardFooter className="flex-shrink-0 bg-white border-t border-black">
         <form onSubmit={handleSubmit} className="flex gap-2 w-full">
           <Input
             value={input}
@@ -263,9 +240,9 @@ export function GeminiChatBot({
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 bg-white text-black border border-black"
           />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
+          <Button type="submit" disabled={isLoading || !input.trim()} className="bg-black text-white border border-black">
             <Send className="w-4 h-4" />
           </Button>
         </form>
