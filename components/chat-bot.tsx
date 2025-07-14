@@ -36,6 +36,17 @@ type Language = typeof LANGUAGES[number]['value']
 
 const CHAT_HISTORY_KEY = 'vidyos-chat-history';
 
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="block w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]"></span>
+      <span className="block w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]"></span>
+      <span className="block w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]"></span>
+      <span className="ml-2 text-sm text-gray-500">Vidyos is typing…</span>
+    </div>
+  );
+}
+
 export function ChatBot({ 
   title = 'Vidyos',
   placeholder = 'Type your message...',
@@ -311,9 +322,8 @@ export function ChatBot({
                     <Bot className="w-5 h-5" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xl flex items-center gap-3">
-                  <Loader2 className="w-5 h-5 animate-spin text-black" />
-                  <span className="text-sm font-medium text-gray-700">Vidyos is thinking...</span>
+                <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xl flex items-center gap-3 min-w-[120px]">
+                  <TypingIndicator />
                 </div>
               </motion.div>
             )}
